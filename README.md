@@ -159,3 +159,33 @@ This demo checks *known sample values*, but **ID + username alone are not secure
 - Each server restart clears demo sessions but not hardcoded fixtures.
 - The sample event date and prices are illustrative, not a verified event listing.
 - Maven builds require an internet connection the first time to download Spring dependencies.
+
+## 📲 QR entry: scan to open student login
+
+QR codes **open the website login page**, but do not log students in automatically. Never encode student IDs, usernames, passwords, or session tokens. This is an educational SRM-inspired demo only, not an authorised SRM identity service.
+
+**Important:** `localhost` and GitHub repository URLs are NOT public website links. Deploy this Spring Boot application to a publicly reachable HTTPS domain, then set its external URL using the `APP_PUBLIC_URL` environment variable. Until then the QR page shows a configuration message rather than a misleading QR.
+
+PowerShell:
+
+```powershell
+$env:APP_PUBLIC_URL="https://your-real-deployed-domain.example/"
+mvn spring-boot:run
+```
+
+Linux/macOS:
+
+```bash
+APP_PUBLIC_URL="https://your-real-deployed-domain.example/" mvn spring-boot:run
+```
+
+On hosting, configure `APP_PUBLIC_URL` to the **actual** domain and restart the app. The above domain is only a placeholder.
+
+After deployment visit `/share.html` for a branded, print-ready poster with **Download PNG**, **Copy login link**, and **Print poster** controls.
+
+Endpoints:
+- `GET /share.html` — public share/print poster page.
+- `GET /api/share` — configured login URL metadata.
+- `GET /api/share/qr.png` — server-generated 480×480 scannable PNG using ZXing.
+
+If the public URL isn't configured, both API endpoints return 503 `PUBLIC_URL_NOT_CONFIGURED`. The QR image is created locally in Java with no third-party QR web service. Scan-test on a separate phone before distributing.

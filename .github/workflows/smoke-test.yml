@@ -24,6 +24,8 @@ jobs:
         run: mvn -B --no-transfer-progress clean verify
       - name: Verify root/index static resources and demo APIs
         shell: bash
+        env:
+          APP_PUBLIC_URL: https://events.example.org/
         run: |
           set -euo pipefail
           java -jar target/srm-event-companion-1.0.0.jar > /tmp/srm-app.log 2>&1 &
@@ -57,4 +59,10 @@ jobs:
           curl -fsS -b /tmp/srm-cookies.txt http://127.0.0.1:8080/api/menu -o /tmp/srm-menu.json
           grep -q 'YOURS' /tmp/srm-seats.json
           grep -q 'Veg meals' /tmp/srm-menu.json
-          echo 'PASS: /, /index.html, CSS, JS, login, seats, menu'
+          curl -fsS http://127.0.0.1:8080/share.html -o /tmp/srm-share.html
+          grep -q 'event-access-qr' /tmp/srm-share.html
+          curl -fsS http://127.0.0.1:8080/api/share -o /tmp/srm-share.json
+          grep -q 'https://events.example.org/' /tmp/srm-share.json
+          curl -fsS http://127.0.0.1:8080/api/share/qr.png -o /tmp/srm-qr.png
+          file /tmp/srm-qr.png | grep -q 'PNG image data'
+          echo 'PASS: index, static assets, login, seats, menu, QR page, QR PNG'
