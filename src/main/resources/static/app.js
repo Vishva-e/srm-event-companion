@@ -16,21 +16,34 @@ const views = { home: $('#view-home'), seat: $('#view-seat'), food: $('#view-foo
 let currentUser = null;
 let currentPass = null;
 let activeFilter = 'all';
+let sessionBusy = false;
 
 async function api(path, options = {}) {
-  const response = await fetch(`/api/${path}`, {
-    credentials: 'same-origin',
-    cache: 'no-store',
-    ...options,
-    headers: { Accept: 'application/json', ...(options.body ? { 'Content-Type': 'application/json' } : {}), ...options.headers }
-  });
-  if (!response.ok) {
-    const body = await response.json().catch(() => null);
-    const error = new Error(body?.message || `Server returned ${response.status}.`);
-    error.status = response.status;
+  const controller = new AbortController();
+  const timeout = window.setTimeout(() => controller.abort(), 15000);
+  try {
+    const response = await fetch(`/api/${path}`, {
+      credentials: 'same-origin',
+      cache: 'no-store',
+      ...options,
+      signal: controller.signal,
+      headers: { Accept: 'application/json', ...(options.body ? { 'Content-Type': 'application/json' } : {}), ...options.headers }
+    });
+    if (!response.ok) {
+      const body = await response.json().catch(() => null);
+      const error = new Error(body?.message || `Server returned ${response.status}. Please try again.`);
+      error.status = response.status;
+      throw error;
+    }
+    return response.status === 204 ? null : await response.json();
+  } catch (error) {
+    if (controller.signal.aborted) throw new Error('The server took too long to respond. Please try again.');
+    if (error instanceof TypeError) throw new Error('Unable to connect to the server. Check your connection and try again.');
+    if (error instanceof SyntaxError) throw new Error('The server returned an unreadable response. Please try again.');
     throw error;
+  } finally {
+    window.clearTimeout(timeout);
   }
-  return response.status === 204 ? null : response.json();
 }
 
 function setText(selector, value) {
@@ -59,21 +72,23 @@ function applyProfile({ student, event }) {
   setText('.nav-indicator', seat.code);
   setText('.sidebar-event-bottom b', seat.code);
   setText('.sidebar-event > strong', event.name);
-  setText('.sidebar-event > span:nth-of-type(2)', `${event.venue}\nBlock ${event.block} · Gate ${event.entryGate}`);
+  setText('#sidebar-event-location', `${event.venue}\nBlock ${event.block} · Gate ${event.entryGate}`);
   setText('.ticket-title h2', event.name);
   setText('.ticket-title p', `${event.venue} · Block ${event.block}`);
   setText('.ticket-stats div:nth-child(1) strong', seat.code);
   setText('.ticket-stats div:nth-child(2) strong', event.entryGate);
   setText('.ticket-stats div:nth-child(3) strong', counter.number);
-  setText('.event-info-line:nth-of-type(2) strong', event.date);
-  setText('.event-info-line:nth-of-type(3) strong', `${event.venue}, Block ${event.block}`);
-  setText('.event-info-line:nth-of-type(4) strong', `Gate ${event.entryGate} · Level ${event.level}`);
+  setText('#event-date-heading', event.date.toUpperCase());
+  setText('#event-date', event.date);
+  setText('#event-venue', `${event.venue}, Block ${event.block}`);
+  setText('#event-entry', `Gate ${event.entryGate} · Level ${event.level}`);
   setText('.quick-card[data-go="seat"] .quick-copy small', `${seatLabel} · Block ${event.block}`);
   setText('.quick-card[data-go="food"] .quick-copy small', `Counter ${counter.number} · ${counter.floor}`);
 
   setText('#view-seat .page-heading .section-kicker', `BLOCK ${event.block} • LEVEL ${event.level}`);
   setText('.theatre-hint', `Front view · Entry Gate ${event.entryGate}`);
   setText('.theatre-head h2', `Block ${event.block} Seating`);
+  setText('.theatre-kicker', event.venue.toUpperCase());
   setText('.level-badge', `LEVEL ${event.level}`);
   setText('.seat-badge', seat.code);
   setText('.your-seat-number h2', seatLabel);
@@ -94,26 +109,47 @@ function applyProfile({ student, event }) {
   setText('.counter-mark span:last-child', counter.zone.toUpperCase());
 }
 
-function showApp(profile, navigate = 'home') {
+function resetAccountState() {
+  activeFilter = 'all';
+  $('#menu-search').value = '';
+  $$('[data-filter]').forEach(button => {
+    const selected = button.dataset.filter === 'all';
+    button.classList.toggle('selected', selected);
+    button.setAttribute('aria-pressed', String(selected));
+  });
+  $('#seat-rows').replaceChildren();
+  $('#menu-grid').replaceChildren();
+  $('#menu-empty').hidden = true;
+  setText('#menu-results', '');
+  setText('#app-error', '');
+}
+
+function showApp(profile, { seats, menu }, navigate = 'home') {
+  resetAccountState();
   applyProfile(profile);
+  renderSeats(seats);
+  renderMenu(menu);
   loginScreen.hidden = true;
   appShell.hidden = false;
-  renderRoute(navigate);
+  renderRoute(navigate, true);
 }
 
-function showLogin() {
+function showLogin({ focus = true, preserveRoute = false, resetForm = true } = {}) {
   currentUser = null;
   currentPass = null;
+  resetAccountState();
   appShell.hidden = true;
   loginScreen.hidden = false;
-  loginForm.reset();
+  if (resetForm) loginForm.reset();
   loginError.textContent = '';
-  history.replaceState(null, '', `${location.pathname}${location.search}`);
+  $('#retry-session').hidden = true;
+  document.title = 'SRM Event Companion · Event Access';
+  if (!preserveRoute) history.replaceState(null, '', `${location.pathname}${location.search}`);
   window.scrollTo({ top: 0, behavior: 'instant' });
-  $('#student-id').focus({ preventScroll: true });
+  if (focus) $('#student-id').focus({ preventScroll: true });
 }
 
-function renderRoute(route) {
+function renderRoute(route, focus = false) {
   if (!currentUser) return;
   const page = Object.hasOwn(views, route) ? route : 'home';
   Object.entries(views).forEach(([key, view]) => { view.hidden = key !== page; });
@@ -126,25 +162,27 @@ function renderRoute(route) {
   const titles = { home: 'Dashboard', seat: 'My seat', food: 'Food counters' };
   setText('#breadcrumb-current', titles[page]);
   document.title = `${titles[page]} · SRM Event Companion`;
+  if (location.hash !== `#${page}`) history.replaceState({ route: page }, '', `#${page}`);
   window.scrollTo({ top: 0, behavior: 'instant' });
+  if (focus) $(`#${page}-heading`).focus({ preventScroll: true });
 }
 
 function goTo(page) {
   if (!currentUser) return;
   const route = Object.hasOwn(views, page) ? page : 'home';
   if (location.hash !== `#${route}`) history.pushState({ route }, '', `#${route}`);
-  renderRoute(route);
-  const heading = $(`#${route === 'home' ? 'home' : route}-heading`);
-  heading?.focus({ preventScroll: true });
+  renderRoute(route, true);
 }
 
 function renderSeats(map) {
   const container = $('#seat-rows');
   container.replaceChildren();
+  container.setAttribute('aria-label', `Seating rows ${map.rows.join(', ')}`);
   const assigned = currentPass.seat.code;
   for (const row of map.rows) {
     const rowNode = document.createElement('div');
     rowNode.className = 'seat-row';
+    rowNode.setAttribute('role', 'group');
     rowNode.setAttribute('aria-label', `Row ${row}`);
     const label = document.createElement('span');
     label.className = `row-label${row === currentPass.seat.row ? ' is-yours' : ''}`;
@@ -211,13 +249,20 @@ function renderMenu(payload) {
 
 async function loadAppData() {
   const [seats, menu] = await Promise.all([api('seats'), api('menu')]);
-  renderSeats(seats);
-  renderMenu(menu);
+  return { seats, menu };
 }
 
-const submitButton = $('.login-submit');
+function setSessionBusy(busy, message = '') {
+  sessionBusy = busy;
+  [...loginForm.elements, $('#demo-fill'), $('#retry-session'), ...$$('[data-signout]')]
+    .forEach(control => { control.disabled = busy; });
+  loginForm.setAttribute('aria-busy', String(busy));
+  setText('#login-status', message);
+}
+
 loginForm.addEventListener('submit', async (event) => {
   event.preventDefault();
+  if (sessionBusy) return;
   const id = $('#student-id').value.trim();
   const name = $('#username').value.trim();
   if (id.length < 3 || name.length < 2) {
@@ -226,18 +271,26 @@ loginForm.addEventListener('submit', async (event) => {
     return;
   }
   loginError.textContent = '';
-  submitButton.disabled = true;
+  $('#retry-session').hidden = true;
+  setSessionBusy(true, 'Loading your event pass…');
+  let signedIn = false;
   try {
     const profile = await api('session', { method: 'POST', body: JSON.stringify({ studentId: id, username: name }) });
-    showApp(profile);
-    await loadAppData();
+    signedIn = true;
+    const data = await loadAppData();
     history.replaceState({ route: 'home' }, '', '#home');
+    showApp(profile, data);
   } catch (error) {
-    await api('session', { method: 'DELETE' }).catch(() => null);
-    showLogin();
-    loginError.textContent = error.message || 'Unable to connect to the Java server.';
+    showLogin({ focus: false, resetForm: false });
+    loginError.textContent = signedIn && error.status !== 401
+      ? `Your account is signed in, but event details could not load. ${error.message}`
+      : error.message;
+    $('#retry-session').hidden = !signedIn || error.status === 401;
   } finally {
-    submitButton.disabled = false;
+    setSessionBusy(false);
+    if (!currentUser) {
+      ($('#retry-session').hidden ? $('#username') : $('#retry-session')).focus({ preventScroll: true });
+    }
   }
 });
 
@@ -250,12 +303,23 @@ $('#demo-fill').addEventListener('click', () => {
 
 $$('[data-go]').forEach(button => button.addEventListener('click', () => goTo(button.dataset.go)));
 $$('[data-signout]').forEach(button => button.addEventListener('click', async () => {
-  await api('session', { method: 'DELETE' }).catch(() => null);
-  showLogin();
+  if (sessionBusy) return;
+  setSessionBusy(true);
+  setText('#app-error', '');
+  try {
+    await api('session', { method: 'DELETE' });
+    showLogin({ focus: false });
+  } catch (error) {
+    setText('#app-error', `Sign out could not be confirmed. ${error.message} Please try signing out again.`);
+    $('#app-error').focus();
+  } finally {
+    setSessionBusy(false);
+    if (!currentUser) $('#student-id').focus({ preventScroll: true });
+  }
 }));
-window.addEventListener('popstate', () => {
-  if (currentUser) renderRoute(location.hash.replace(/^#/, ''));
-});
+const syncRoute = () => renderRoute(location.hash.replace(/^#/, ''), true);
+window.addEventListener('popstate', syncRoute);
+window.addEventListener('hashchange', syncRoute);
 
 $('#locate-seat').addEventListener('click', () => {
   if (!currentPass) return;
@@ -266,7 +330,8 @@ $('#locate-seat').addEventListener('click', () => {
   void selected.offsetWidth;
   selected.classList.add('seat-pulse');
   selected.focus({ preventScroll: true });
-  selected.scrollIntoView({ behavior: 'smooth', block: 'center', inline: 'center' });
+  const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  selected.scrollIntoView({ behavior: reducedMotion ? 'instant' : 'smooth', block: 'center', inline: 'center' });
   $('#seat-notice').textContent = `You found it! The gold seat is yours: ${code}.`;
 });
 
@@ -280,6 +345,7 @@ function filterMenu() {
     if (!card.hidden) visible++;
   });
   $('#menu-empty').hidden = visible !== 0;
+  setText('#menu-results', `${visible} menu ${visible === 1 ? 'item' : 'items'} shown.`);
 }
 $$('[data-filter]').forEach(button => button.addEventListener('click', () => {
   activeFilter = button.dataset.filter;
@@ -297,14 +363,25 @@ for (let i = 0; i < 27; i++) {
   preview.appendChild(make('span', `mini-seat${i === 22 ? ' mini-seat-highlighted' : ''}`));
 }
 
-// Restore an authenticated server session on refresh. No client-side impersonation.
-(async function bootstrap() {
+// Serialize session changes so a slow restore cannot overwrite a new sign-in.
+async function restoreSession() {
+  if (sessionBusy) return;
+  setSessionBusy(true, 'Checking your demo session…');
+  loginError.textContent = '';
+  $('#retry-session').hidden = true;
   try {
     const profile = await api('session');
-    showApp(profile, location.hash.replace(/^#/, '') || 'home');
-    await loadAppData();
+    const data = await loadAppData();
+    showApp(profile, data, location.hash.replace(/^#/, '') || 'home');
   } catch (error) {
-    if (currentUser) showLogin();
-    if (error.status && error.status !== 401) loginError.textContent = error.message;
+    showLogin({ focus: false, preserveRoute: true, resetForm: false });
+    if (error.status !== 401) {
+      loginError.textContent = error.message;
+      $('#retry-session').hidden = false;
+    }
+  } finally {
+    setSessionBusy(false);
   }
-})();
+}
+$('#retry-session').addEventListener('click', restoreSession);
+restoreSession();

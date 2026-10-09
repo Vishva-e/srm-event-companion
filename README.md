@@ -17,7 +17,7 @@ An **unofficial SRM-inspired student hackathon prototype** recreated from the fo
 **Prerequisites:** JDK 17 or newer and Apache Maven 3.9+ (or open `pom.xml` in IntelliJ IDEA and run `EventCompanionApplication`).
 
 ```bash
-cd srm-event-companion-java
+cd srm-event-companion
 mvn spring-boot:run
 ```
 
@@ -58,7 +58,7 @@ Use **only** these fictional identities. Names must match the corresponding samp
 ## ✅ Functional features
 
 1. **Student demo login:** Enter ID and username. Spring Boot validates input and matches it against an in-memory list of fictitious profiles.
-2. **Session-backed dashboard:** Server responds with personalised event pass, assigned seat and food counter; refresh retains your server session for 30 minutes.
+2. **Session-backed dashboard:** Server responds with personalised event pass, assigned seat and food counter; refresh restores your server session until it expires after 30 minutes of inactivity.
 3. **Cinema-style seating:** Java API serves a 7-row × 9-seat auditorium map. Your seat is **highlighted gold**. Available and occupied seats are visually distinct. **Locate my seat** scrolls/highlights the assigned spot.
 4. **Food counters:** Java API serves the assigned food counter and four menu items with prices in INR. Client-side filters and search work across the API data.
 5. **Responsive layouts:** Desktop side navigation and mobile bottom navigation.
@@ -66,7 +66,7 @@ Use **only** these fictional identities. Names must match the corresponding samp
 
 ## 🔌 REST API
 
-All responses are JSON; session uses an HTTP-only browser cookie. `/api/session` is public for login; event resources require a demo session.
+Responses with a body are JSON; successful sign-out returns `204 No Content`. Sessions use an HTTP-only, SameSite=Strict browser cookie. `POST /api/session` is public for login; `GET /api/session` and event resources require a demo session. Signing out is safe to repeat even when no session exists.
 
 | HTTP | URL | Function |
 |---|---|---|
@@ -91,7 +91,7 @@ curl -b cookies.txt http://localhost:8080/api/menu
 ## 🗂️ Project structure
 
 ```text
-srm-event-companion-java/
+srm-event-companion/
 ├── pom.xml
 ├── Dockerfile
 ├── src/
@@ -123,3 +123,10 @@ This demo checks *known sample values*, but **ID + username alone are not secure
 - Each server restart clears demo sessions but not hardcoded fixtures.
 - The sample event date and prices are illustrative, not a verified event listing.
 - Maven builds require an internet connection the first time to download Spring dependencies.
+
+## Troubleshooting
+
+- **The page opens but sign-in does not work:** Start the Spring Boot server and open `http://localhost:8080`; opening `index.html` directly does not provide the API. JavaScript must be enabled.
+- **Demo account not found:** Use a matching ID and username from the table above. Leading/trailing spaces and letter case are ignored.
+- **The server port is already in use:** Stop the other server or run `PORT=8081 mvn spring-boot:run`, then open `http://localhost:8081`.
+- **Maven cannot download dependencies:** Check your internet connection and Maven proxy/repository settings, then retry `mvn clean verify`.

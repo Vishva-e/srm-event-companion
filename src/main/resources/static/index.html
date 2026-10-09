@@ -11,6 +11,7 @@
   <script defer src="app.js"></script>
 </head>
 <body>
+  <noscript><p class="script-notice">JavaScript is needed to sign in and display your demo event pass. Enable JavaScript and reload this page.</p></noscript>
   <!-- Independent SRM-inspired student demo. Only sample IDs/usernames are sent to this local Spring Boot server; no real SRM identity service is contacted. -->
   <div id="login-screen" class="login-screen">
     <div class="login-frame">
@@ -52,9 +53,11 @@
               <div class="input-wrap"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.5 3.5-7 8-7s8 2.5 8 7"/></svg><input id="username" name="username" type="text" autocomplete="off" maxlength="40" placeholder="Enter your username" aria-describedby="login-error" required /></div>
             </div>
             <p id="login-error" class="form-error" role="alert" aria-live="polite"></p>
-            <button class="primary-btn login-submit" type="submit">Access my event pass <span aria-hidden="true">→</span></button>
+            <p id="login-status" class="form-status" role="status"></p>
+            <button class="primary-btn login-submit" type="submit" disabled>Access my event pass <span aria-hidden="true">→</span></button>
           </form>
-          <div class="demo-access"><span class="demo-access-icon" aria-hidden="true">✦</span><div><strong>Try the interactive demo</strong><p>Use sample details — no real university credentials needed. Other demo users: SRM2026002 / Sanjana and SRM2026003 / Arun.</p><button id="demo-fill" type="button" class="link-btn">Fill demo details <span aria-hidden="true">↗</span></button></div></div>
+          <button id="retry-session" class="link-btn retry-session" type="button" hidden>Retry loading my event pass</button>
+          <div class="demo-access"><span class="demo-access-icon" aria-hidden="true">✦</span><div><strong>Try the interactive demo</strong><p>Use sample details — no real university credentials needed. Other demo users: SRM2026002 / Sanjana and SRM2026003 / Arun.</p><button id="demo-fill" type="button" class="link-btn" disabled>Fill demo details <span aria-hidden="true">↗</span></button></div></div>
         </div>
         <div class="login-note"><span aria-hidden="true">ⓘ</span> Unofficial demo. Runs on a demo Java server; it does not connect to SRM authentication or collect passwords.</div>
       </section>
@@ -74,7 +77,7 @@
       <div class="sidebar-event">
         <span class="sidebar-event-kicker"><span class="live-dot"></span> EVENT PASS ACTIVE</span>
         <strong>SRM Innovate<br />2026</strong>
-        <span>Main Auditorium<br />Block A · Gate 02</span>
+        <span id="sidebar-event-location">Main Auditorium<br />Block A · Gate 02</span>
         <div class="sidebar-event-bottom"><span>YOUR SEAT</span><b>E07</b></div>
       </div>
       <div class="sidebar-bottom">
@@ -91,17 +94,18 @@
       </header>
 
       <main id="main-content" class="main-content">
+        <p id="app-error" class="app-error" role="alert" tabindex="-1"></p>
         <section id="view-home" class="view" aria-labelledby="home-heading">
-          <div class="page-heading home-heading"><div><div class="section-kicker">THURSDAY • 08 OCTOBER 2026</div><h1 id="home-heading" tabindex="-1">Hello, <span id="welcome-name">Student</span> <span class="hello-wave" aria-hidden="true">👋</span></h1><p>Here's everything you need for a smooth event experience.</p></div><span class="page-heading-label"><span aria-hidden="true">✦</span> Your event, organized.</span></div>
+          <div class="page-heading home-heading"><div><div id="event-date-heading" class="section-kicker">08 OCTOBER 2026</div><h1 id="home-heading" tabindex="-1">Hello, <span id="welcome-name">Student</span> <span class="hello-wave" aria-hidden="true">👋</span></h1><p>Here's everything you need for a smooth event experience.</p></div><span class="page-heading-label"><span aria-hidden="true">✦</span> Your event, organized.</span></div>
           <div class="dashboard-grid">
             <article class="event-ticket" aria-label="Your digital event pass">
               <div class="ticket-orbit ticket-orbit-one" aria-hidden="true"></div><div class="ticket-orbit ticket-orbit-two" aria-hidden="true"></div>
               <div class="ticket-head"><span class="pass-pill"><span class="status-dot"></span> PASS ACTIVE</span><img src="assets/srm-inspired-mark.svg" alt="" width="42" height="42" /></div>
-              <div class="ticket-title"><span>OFFICIAL EVENT DETAILS · DEMO</span><h2>SRM INNOVATE 2026</h2><p>Main Auditorium <span>•</span> Block A</p></div>
+              <div class="ticket-title"><span>SAMPLE EVENT DETAILS · DEMO</span><h2>SRM INNOVATE 2026</h2><p>Main Auditorium <span>•</span> Block A</p></div>
               <div class="ticket-dashed"></div>
               <div class="ticket-stats"><div><span>YOUR SEAT</span><strong>E07</strong></div><div><span>ENTRY GATE</span><strong>02</strong></div><div><span>FOOD COUNTER</span><strong class="gold-text">03</strong></div></div>
             </article>
-            <article class="event-info card"><div class="card-title-row"><h2>Event information</h2><span class="round-icon">✦</span></div><div class="event-info-line"><span class="icon-square" aria-hidden="true">▤</span><div><span>DATE</span><strong>08 October 2026</strong></div></div><div class="event-info-line"><span class="icon-square" aria-hidden="true">◷</span><div><span>VENUE</span><strong>Main Auditorium, Block A</strong></div></div><div class="event-info-line"><span class="icon-square" aria-hidden="true">⇥</span><div><span>ENTRY</span><strong>Gate 02 · Level 01</strong></div></div><span class="info-caption">Sample event information for UI demonstration.</span></article>
+            <article class="event-info card"><div class="card-title-row"><h2>Event information</h2><span class="round-icon" aria-hidden="true">✦</span></div><div class="event-info-line"><span class="icon-square" aria-hidden="true">▤</span><div><span>DATE</span><strong id="event-date">08 October 2026</strong></div></div><div class="event-info-line"><span class="icon-square" aria-hidden="true">◷</span><div><span>VENUE</span><strong id="event-venue">Main Auditorium, Block A</strong></div></div><div class="event-info-line"><span class="icon-square" aria-hidden="true">⇥</span><div><span>ENTRY</span><strong id="event-entry">Gate 02 · Level 01</strong></div></div><span class="info-caption">Sample event information for UI demonstration.</span></article>
           </div>
           <div class="section-title-row"><div><span class="section-kicker">EXPLORE</span><h2>Your quick access</h2></div><span class="section-subtitle">Everything is one click away</span></div>
           <div class="quick-grid"><button class="quick-card" type="button" data-go="seat"><span class="quick-icon blue-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 4h14v5H5zM4 11h16v7H4zM7 18v3m10-3v3"/></svg></span><span class="quick-copy"><b>Find your seat</b><small>Row E • Seat 07 • Block A</small><span>View cinema-style map</span></span><span class="quick-arrow" aria-hidden="true">↗</span></button><button class="quick-card" type="button" data-go="food"><span class="quick-icon gold-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 4v7a4 4 0 0 0 8 0V4M8 4v16m8-16c3 0 5 3 5 7v3h-5V4Zm0 10v6"/></svg></span><span class="quick-copy"><b>Explore food</b><small>Counter 03 • Ground floor</small><span>Browse menu &amp; prices</span></span><span class="quick-arrow" aria-hidden="true">↗</span></button></div>
@@ -130,12 +134,8 @@
           <section class="counter-banner" aria-label="Your food counter"><div class="counter-banner-glow" aria-hidden="true"></div><div class="counter-copy"><span class="counter-badge"><span class="gold-dot"></span> YOUR ASSIGNED COUNTER</span><div class="counter-display"><b>03</b><div><h2>Food Counter 03</h2><p>Ground Floor <span>•</span> Zone B</p></div></div><p class="counter-nearby"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 22s7-8 7-13a7 7 0 0 0-14 0c0 5 7 13 7 13Z"/><circle cx="12" cy="9" r="2.5"/></svg> <span class="counter-nearby-text">Near Main Auditorium · Gate 02</span></p></div><div class="counter-mark" aria-hidden="true"><span>COUNTER</span><b>03</b><span>ZONE B</span></div></section>
           <div class="section-title-row menu-title-row"><div><span class="section-kicker">DISCOVER THE MENU</span><h2>Today's menu</h2></div><span class="sample-tag">SAMPLE MENU &amp; PRICES</span></div>
           <div class="menu-tools"><div class="filter-chips" role="group" aria-label="Filter menu by category"><button type="button" class="chip selected" data-filter="all" aria-pressed="true">All items</button><button type="button" class="chip" data-filter="meals" aria-pressed="false">Meals</button><button type="button" class="chip" data-filter="snacks" aria-pressed="false">Snacks</button><button type="button" class="chip" data-filter="drinks" aria-pressed="false">Drinks</button></div><label class="menu-search"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-4-4"/></svg><span class="sr-only">Search menu</span><input id="menu-search" type="search" placeholder="Search menu..." /></label></div>
-          <div class="menu-grid" id="menu-grid">
-            <article class="menu-card" data-category="meals" data-search="veg meals rice sambar vegetables lunch"><div class="menu-art menu-art-veg"><span class="menu-illustration" aria-hidden="true">✺</span><span>VEG</span></div><div class="menu-content"><div class="menu-topline"><span class="menu-type">VEGETARIAN · MEALS</span><span class="menu-price">₹120</span></div><h3>Veg meals</h3><p>Rice, sambar &amp; traditional sides</p></div></article>
-            <article class="menu-card" data-category="meals" data-search="chicken rice spicy non veg lunch"><div class="menu-art menu-art-nonveg"><span class="menu-illustration" aria-hidden="true">✹</span><span>NON-VEG</span></div><div class="menu-content"><div class="menu-topline"><span class="menu-type">NON-VEGETARIAN · MEALS</span><span class="menu-price">₹150</span></div><h3>Chicken rice</h3><p>Spiced rice &amp; chicken</p></div></article>
-            <article class="menu-card" data-category="snacks" data-search="paneer wrap grilled snacks"><div class="menu-art menu-art-snack"><span class="menu-illustration" aria-hidden="true">◒</span><span>SNACK</span></div><div class="menu-content"><div class="menu-topline"><span class="menu-type">VEGETARIAN · SNACKS</span><span class="menu-price">₹90</span></div><h3>Paneer wrap</h3><p>Fresh grilled wrap</p></div></article>
-            <article class="menu-card" data-category="drinks" data-search="fresh lime juice drink refreshment chilled"><div class="menu-art menu-art-drink"><span class="menu-illustration" aria-hidden="true">◉</span><span>DRINK</span></div><div class="menu-content"><div class="menu-topline"><span class="menu-type">COLD BEVERAGE · DRINKS</span><span class="menu-price">₹50</span></div><h3>Fresh lime juice</h3><p>Chilled refreshment</p></div></article>
-          </div>
+          <div class="menu-grid" id="menu-grid"></div>
+          <p id="menu-results" class="sr-only" role="status"></p>
           <div class="empty-state" id="menu-empty" hidden>No menu items match your search. Try another keyword or category.</div>
           <div class="food-bottom-info"><span aria-hidden="true">ⓘ</span><p>Counter number, food items and pricing are demonstration data. Actual event availability should be confirmed with the event organizers.</p></div>
         </section>
