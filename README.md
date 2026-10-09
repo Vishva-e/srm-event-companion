@@ -17,6 +17,7 @@ An **unofficial SRM-inspired student hackathon prototype** recreated from the fo
 **Prerequisites:** JDK 17 or newer and Apache Maven 3.9+ (or open `pom.xml` in IntelliJ IDEA and run `EventCompanionApplication`).
 
 ```bash
+git clone https://github.com/Vishva-e/srm-event-companion.git
 cd srm-event-companion
 mvn spring-boot:run
 ```
@@ -46,6 +47,41 @@ You can deploy the resulting executable JAR to any hosting platform supporting a
 docker build -t srm-event-companion .
 docker run --rm -p 8080:8080 srm-event-companion
 ```
+
+## 🛠 Troubleshooting: index.html does not load
+
+**Use the Spring Boot server, not VS Code Live Server**. Open the terminal in the directory containing `pom.xml`:
+
+```bash
+git clone https://github.com/Vishva-e/srm-event-companion.git
+cd srm-event-companion
+java -version
+mvn -version
+mvn spring-boot:run
+```
+
+Wait for `Started EventCompanionApplication` in the terminal and open
+**http://localhost:8080/** (or **http://localhost:8080/index.html**).
+
+- **`cd: no such file or directory`**: After cloning the repository, the folder is named `srm-event-companion` by default. Do **not** use `srm-event-companion-java` unless you renamed it yourself.
+- **`mvn: command not found` / `mvn is not recognized`**: Install Apache Maven 3.9+ and add its `bin` directory to your PATH. Reopen the terminal, then run `mvn -version`.
+- **Wrong Java version**: Set `JAVA_HOME` to JDK 17+; check `java -version` and `mvn -version`.
+- **Port 8080 already in use**: Shut down the existing server or use `mvn spring-boot:run -Dspring-boot.run.arguments=--server.port=8081` and browse to `http://localhost:8081/`.
+- **404 Not Found**: Confirm you started the Java application from the repository root. The HTML is at `src/main/resources/static/index.html`, and Spring Boot serves it at the root path `/`.
+- **Blank UI / assets missing**: Open browser Developer Tools (F12) → Console and Network. Confirm `/app.js`, `/styles.css`, and `/assets/srm-inspired-mark.svg` return HTTP 200. Run `mvn clean spring-boot:run`, then reload with Ctrl+Shift+R.
+- **Java build errors**: Run `mvn clean test` and inspect the **first** error. The first build requires internet access to download dependencies.
+- **Do not open `index.html` via `file://`**: Login and seat/menu features require `/api/` endpoints on the Spring Boot server.
+
+You can verify the server from a second terminal:
+
+```bash
+curl -I http://localhost:8080/
+curl -I http://localhost:8080/index.html
+curl -I http://localhost:8080/styles.css
+curl -I http://localhost:8080/app.js
+```
+
+When all four return HTTP 200, try the demo account: `SRM2026001` / `Vishva`.
 
 ## 🔑 Demo student accounts
 
@@ -156,3 +192,35 @@ This demo checks *known sample values*, but **ID + username alone are not secure
 - **Demo account not found:** Use a matching ID and username from the table above. Leading/trailing spaces and letter case are ignored.
 - **The server port is already in use:** Stop the other server or run `PORT=8081 mvn spring-boot:run`, then open `http://localhost:8081`.
 - **Maven cannot download dependencies:** Check your internet connection and Maven proxy/repository settings, then retry `mvn clean verify`.
+
+## 📲 QR entry: scan to open student login
+
+QR codes **open the website login page**, but do not log students in automatically. Never encode student IDs, usernames, passwords, or session tokens. This is an educational SRM-inspired demo only, not an authorised SRM identity service.
+
+The default value in `application.properties` is an intentionally non-working sample: `https://srm-event-companion.example/`. The QR endpoints deliberately refuse placeholder/sample and localhost addresses (503), so no invalid QR is shared. Set `APP_PUBLIC_URL` to the real HTTPS deployment URL to enable the QR.
+
+**Important:** `localhost` and GitHub repository URLs are NOT public website links. Deploy this Spring Boot application to a publicly reachable HTTPS domain, then set its external URL using the `APP_PUBLIC_URL` environment variable. Until then the QR page shows a configuration message rather than a misleading QR.
+
+PowerShell:
+
+```powershell
+$env:APP_PUBLIC_URL="https://your-real-deployed-domain.example/"
+mvn spring-boot:run
+```
+
+Linux/macOS:
+
+```bash
+APP_PUBLIC_URL="https://your-real-deployed-domain.example/" mvn spring-boot:run
+```
+
+On hosting, configure `APP_PUBLIC_URL` to the **actual** domain and restart the app. The above domain is only a placeholder.
+
+After deployment visit `/share.html` for a branded, print-ready poster with **Download PNG**, **Copy login link**, and **Print poster** controls.
+
+Endpoints:
+- `GET /share.html` — public share/print poster page.
+- `GET /api/share` — configured login URL metadata.
+- `GET /api/share/qr.png` — server-generated 480×480 scannable PNG using ZXing.
+
+If the public URL isn't configured, both API endpoints return 503 `PUBLIC_URL_NOT_CONFIGURED`. The QR image is created locally in Java with no third-party QR web service. Scan-test on a separate phone before distributing.

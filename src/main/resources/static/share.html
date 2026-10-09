@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="en"><head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#084298"><title>Event Entry QR · SRM Event Companion</title>
+<link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
+<style>
+:root{--blue:#084298;--navy:#102b56;--gold:#e1b052;--soft:#f1f5fb}
+*{box-sizing:border-box}body{margin:0;background:radial-gradient(circle at top right,#e3ebfb,var(--soft));color:#19355a;font-family:Inter,Arial,system-ui,sans-serif}
+.page{max-width:1020px;margin:auto;padding:25px 20px 60px}
+header{display:flex;justify-content:space-between;align-items:center}
+.brand{display:flex;gap:12px;align-items:center;font-size:21px;font-weight:900;color:var(--blue)}
+.brand span{display:block;font-size:10px;letter-spacing:1px}.brand img{width:51px}
+header a{color:var(--blue);text-decoration:none;background:white;padding:12px 17px;border-radius:25px;font-size:13px;font-weight:700}
+.hero{text-align:center;margin:30px auto;max-width:600px}
+.hero small{letter-spacing:2px;font-weight:800;color:var(--blue)}h1{font-size:clamp(38px,6vw,62px);line-height:1.05;color:#112b50;margin:20px 0;letter-spacing:-2px}h1 em{font-style:normal;color:var(--blue)}
+.hero p{color:#687b96;line-height:1.8;font-size:14px}
+.poster{background:white;border-radius:22px;overflow:hidden;box-shadow:0 20px 60px #1d47741c}
+.poster-head{background:linear-gradient(120deg,#084298,#0b254c);color:white;padding:26px 35px;display:flex;align-items:center;justify-content:space-between}
+.poster-head small{font-size:10px;letter-spacing:1px;color:#f4cf8b;font-weight:800}
+.poster-head h2{margin:9px 0 3px;font-size:30px}.poster-head p{margin:0;color:#b7d1f1}
+.year{padding:14px 18px;border-radius:14px;background:var(--gold);color:var(--navy);font-size:12px;font-weight:900;text-align:center}
+.poster-body{display:grid;grid-template-columns:340px 1fr;gap:36px;align-items:center;padding:38px}
+.qr-shell{min-height:330px;border:1px solid #dae4f1;border-radius:18px;display:flex;align-items:center;justify-content:center;background:white;padding:22px}
+.qr-shell img{max-width:100%;height:auto;image-rendering:pixelated}
+#qr-loading{color:#7486a1;text-align:center;font-weight:700}
+.qr-details h3{font-size:13px;letter-spacing:1px;color:var(--blue)}
+li{margin:12px 0;line-height:1.5;font-size:14px;color:#3c5676;font-weight:600}
+.link-label{margin-top:20px;color:#8796ac;font-size:11px;font-weight:800;letter-spacing:1px}
+#share-url{display:block;overflow-wrap:anywhere;color:var(--blue);font-size:13px;margin:7px 0}
+.note{background:#fff8e8;color:#8c672b;font-size:12px;padding:12px;border-radius:10px;line-height:1.7}
+.poster-foot{padding:16px 35px;border-top:2px dashed #dce4f0;display:flex;justify-content:space-between;font-size:11px;font-weight:800;letter-spacing:1px;color:#7484a0}
+.actions{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin:26px auto}
+.action{font:700 13px Inter,Arial,sans-serif;border:1px solid #d1dceb;border-radius:11px;padding:14px 20px;cursor:pointer;background:white;color:var(--blue);text-decoration:none}
+.action.primary{background:var(--blue);color:white;border-color:var(--blue)}
+.action:disabled,.action.disabled{opacity:.45;pointer-events:none}
+#error{margin:16px auto;padding:17px;border:1px solid #ffca95;border-radius:10px;color:#804a25;background:#fff5ec}
+#feedback{text-align:center;color:#00806a;font-size:13px;font-weight:700}
+.disclaimer{text-align:center;color:#73849a;font-size:12px;line-height:1.7}
+[hidden]{display:none!important}
+@media(max-width:720px){.page{padding:20px 12px 40px}.brand{font-size:16px}.brand img{width:40px}.poster-body{grid-template-columns:1fr;padding:20px;gap:18px}.qr-shell{min-height:280px}.qr-shell img{max-width:245px}.poster-head{padding:20px}.poster-head h2{font-size:22px}.poster-foot{padding:14px 16px;font-size:8px}.actions{flex-direction:column}.action{text-align:center}.hero{margin:23px 0}.hero p{font-size:12px}}
+@media print{body{background:white}.page{width:100%;padding:0}header,.hero,.actions,#error,#feedback,.disclaimer{display:none!important}.poster{box-shadow:none;border:1px solid #b7c3d7;break-inside:avoid}.poster-head{-webkit-print-color-adjust:exact;print-color-adjust:exact}}
+</style></head><body><div class="page">
+<header><div class="brand"><img src="/assets/srm-inspired-mark.svg" alt=""><div>SRM<span>EVENT COMPANION DEMO</span></div></div><a href="/">← Student Login</a></header>
+<div class="hero"><small>STUDENT EVENT ACCESS • 2026</small><h1>One scan.<br><em>Your event awaits.</em></h1><p>Scan the QR to open the event login page, then enter your demo student ID and username to find your seat and food counter.</p></div>
+<section class="poster" aria-label="Student event access QR poster">
+<div class="poster-head"><div><small>SRM-INSPIRED EDUCATIONAL DEMO</small><h2>SCAN TO ENTER</h2><p>SRM Innovate 2026</p></div><div class="year">EVENT<br>2026</div></div>
+<div class="poster-body">
+<div class="qr-shell"><div id="qr-loading" role="status">Preparing QR code…</div><img id="event-access-qr" width="280" height="280" alt="QR linking to the event login page" hidden></div>
+<div class="qr-details"><h3>HOW IT WORKS</h3><ol><li>Open your phone's camera.</li><li>Scan the QR code.</li><li>Visit the student login page.</li><li>Enter demo student ID + username.</li><li>Find your assigned seat and food counter.</li></ol>
+<div class="link-label">PUBLIC ACCESS LINK</div><a id="share-url" rel="noopener" target="_blank">Waiting for configured website URL</a>
+<p class="note">Unofficial student demo. Not connected to SRM authentication; never enter actual university credentials.</p></div>
+</div><div class="poster-foot"><span>STUDENT EXPERIENCE PORTAL</span><span>SEATS · GATES · FOOD COUNTERS</span></div></section>
+<div id="error" hidden role="alert"></div>
+<div class="actions"><a class="action primary disabled" id="download" href="#" download="srm-event-entry-qr.png" aria-disabled="true">↓ Download QR PNG</a><button class="action" id="copy" disabled>Copy Login Link</button><button class="action" id="print" disabled>Print Poster</button></div>
+<p id="feedback" role="status"></p><p class="disclaimer">QR codes must use your deployed public website URL — neither localhost nor GitHub source links work on students' phones.</p>
+</div>
+<script>
+'use strict';
+const img=document.getElementById('event-access-qr'),loading=document.getElementById('qr-loading'),error=document.getElementById('error'),download=document.getElementById('download'),copy=document.getElementById('copy'),print=document.getElementById('print'),link=document.getElementById('share-url');
+let target='';
+async function init(){
+try{
+const response=await fetch('/api/share',{cache:'no-store'});
+const data=await response.json();
+if(!response.ok)throw new Error(data.message||'Event public URL not set.');
+target=data.loginUrl;
+link.textContent=target;link.href=target;
+img.onload=()=>{img.hidden=false;loading.hidden=true;download.classList.remove('disabled');download.removeAttribute('aria-disabled');download.href=data.qrImagePath;copy.disabled=false;print.disabled=false;};
+img.onerror=()=>{loading.textContent='QR image unavailable';error.hidden=false;error.textContent='Check the Java QR endpoint: /api/share/qr.png';};
+img.src=data.qrImagePath;
+}catch(e){loading.textContent='Public QR is not ready yet.';error.hidden=false;error.textContent=e.message+' Deploy this Spring Boot website, set APP_PUBLIC_URL to its real public URL, and restart the service.';}
+}
+copy.addEventListener('click',async()=>{try{await navigator.clipboard.writeText(target);document.getElementById('feedback').textContent='Login link copied';}catch(e){document.getElementById('feedback').textContent='Copy failed. Please copy the visible link.'}});
+print.addEventListener('click',()=>window.print());
+download.addEventListener('click',e=>{if(download.classList.contains('disabled'))e.preventDefault()});
+init();
+</script></body></html>
