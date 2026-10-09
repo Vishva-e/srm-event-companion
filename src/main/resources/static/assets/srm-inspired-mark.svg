@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="128" height="128" viewBox="0 0 128 128" role="img" aria-label="SRM-inspired academic emblem">
+  <circle cx="64" cy="64" r="61" fill="#DDAE54"/>
+  <circle cx="64" cy="64" r="55" fill="#FFFFFF"/>
+  <circle cx="64" cy="64" r="50" fill="#084298"/>
+  <circle cx="64" cy="64" r="44" fill="none" stroke="#E8C875" stroke-width="1.5"/>
+  <path d="M64 94V48M63 57C56 46 46 40 34 40M65 58C74 46 85 39 95 40M63 69C50 59 41 56 30 58M65 70C79 59 90 58 99 59M64 82C54 75 44 71 37 73M64 82C75 74 83 71 91 73" fill="none" stroke="#F5D88C" stroke-width="5" stroke-linecap="round"/>
+  <path d="M64 92c-8-4-15-4-24-2m24 2c8-4 15-4 24-2" fill="none" stroke="#F5D88C" stroke-width="4" stroke-linecap="round"/>
+  <path d="M37 36q-4-8-12-5 0 9 10 13m12-8q-2-10-11-12-2 10 7 16m12-10q2-12-7-16-5 8 2 17m15-2q1-13-8-17-6 8 0 17m16 0q6-11 0-18-9 4-9 15m21 10q9-5 9-15-10-3-13 9m16 16q10-2 13-11-10-5-17 3M28 56q-11-3-15 4 7 7 17 3m72-7q11-3 15 4-7 7-17 3" fill="#F5D88C"/>
+  <path d="M46 103h36" stroke="#E4B965" stroke-width="3" stroke-linecap="round"/>
+</svg>
