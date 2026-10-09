@@ -7,6 +7,7 @@ must already be running. Only fake demo accounts and a temporary profile are use
 """
 
 import argparse
+import base64
 from contextlib import contextmanager
 import json
 from pathlib import Path
@@ -26,13 +27,18 @@ except ImportError:
 class Browser:
     """Small synchronous CDP client; events may arrive between command replies."""
 
-    def __init__(self, address):
-        self.socket = websocket.create_connection(address, timeout=10, suppress_origin=True)
+    def __init__(self, address, timeout=30, screenshots=None):
+        self.socket = websocket.create_connection(address, timeout=timeout, suppress_origin=True)
+        self.timeout = timeout
+        self.screenshots = screenshots
         self.sequence = 0
         self.exceptions = []
         self.checks = 0
         self.call("Page.enable")
         self.call("Runtime.enable")
+        self.call("Network.enable")
+        # Exercise the local app with its system-font fallback, without CDN delays.
+        self.call("Network.setBlockedURLs", urls=["https://fonts.googleapis.com/*", "https://fonts.gstatic.com/*"])
 
     def call(self, method, **params):
         self.sequence += 1
@@ -55,8 +61,8 @@ class Browser:
             raise AssertionError(f"JavaScript evaluation failed: {result['exceptionDetails']}")
         return result.get("result", {}).get("value")
 
-    def wait(self, expression, description, timeout=10):
-        deadline = time.monotonic() + timeout
+    def wait(self, expression, description, timeout=None):
+        deadline = time.monotonic() + (timeout or self.timeout)
         while time.monotonic() < deadline:
             try:
                 if self.evaluate(expression):
@@ -87,17 +93,27 @@ class Browser:
         self.wait("!window.__smokeReloadMarker && document.readyState === 'complete' && " + ready,
                   description)
 
+    def screenshot(self, name):
+        if self.screenshots is None:
+            return
+        self.evaluate("document.fonts.ready.then(() => true)")
+        size = self.call("Page.getLayoutMetrics")["cssContentSize"]
+        result = self.call("Page.captureScreenshot", format="png", captureBeyondViewport=True,
+                           clip={"x": 0, "y": 0, "width": size["width"], "height": size["height"], "scale": 1})
+        self.screenshots.mkdir(parents=True, exist_ok=True)
+        (self.screenshots / f"{name}.png").write_bytes(base64.b64decode(result["data"]))
+
     def close(self):
         self.socket.close()
 
 
 @contextmanager
-def launch_browser(chrome):
-    with tempfile.TemporaryDirectory(prefix="srm-browser-smoke-") as directory:
+def launch_browser(chrome, timeout=30, screenshots=None):
+    with tempfile.TemporaryDirectory(prefix="srm-browser-smoke-", ignore_cleanup_errors=True) as directory:
         profile = Path(directory)
         with (profile / "chrome.log").open("w+") as log:
             process = subprocess.Popen([
-                chrome, "--headless=new", "--no-sandbox", "--disable-gpu",
+                chrome, "--headless=new", "--no-sandbox", "--disable-gpu", "--disable-dev-shm-usage",
                 "--no-first-run", "--no-default-browser-check", "--window-size=1440,1000",
                 "--remote-debugging-address=127.0.0.1", "--remote-debugging-port=0",
                 f"--user-data-dir={profile / 'profile'}", "about:blank",
@@ -105,31 +121,42 @@ def launch_browser(chrome):
             browser = None
             try:
                 port_file = profile / "profile" / "DevToolsActivePort"
-                deadline = time.monotonic() + 15
+                deadline = time.monotonic() + 60
                 while not port_file.exists():
                     if process.poll() is not None or time.monotonic() >= deadline:
                         log.seek(0)
-                        raise RuntimeError(f"Chrome did not start:\n{log.read()[-4000:]}")
+                        status = process.poll()
+                        reason = f"exited with code {status}" if status is not None else "DevTools was not ready after 60 seconds"
+                        raise RuntimeError(f"Browser startup failed: {chrome} (PID {process.pid}), {reason}.\n"
+                                           f"{log.read()[-4000:] or '(No browser log output.)'}")
                     time.sleep(0.1)
                 port = port_file.read_text().splitlines()[0]
-                with urlopen(f"http://127.0.0.1:{port}/json/list", timeout=5) as response:
+                with urlopen(f"http://127.0.0.1:{port}/json/list", timeout=timeout) as response:
                     targets = json.load(response)
                 page = next(target for target in targets if target["type"] == "page")
-                browser = Browser(page["webSocketDebuggerUrl"])
+                browser = Browser(page["webSocketDebuggerUrl"], timeout, screenshots)
+                browser.call("Emulation.setDeviceMetricsOverride", width=1440, height=1000,
+                             deviceScaleFactor=1, mobile=False)
                 yield browser
             finally:
                 if browser:
                     try:
                         browser.close()
-                    except websocket.WebSocketException:
-                        pass
-                if process.poll() is None:
-                    process.terminate()
+                    except (OSError, websocket.WebSocketException) as error:
+                        print(f"WARNING: Could not close browser connection: {error}", file=sys.stderr)
+                for action in ("terminate", "kill"):
+                    if process.poll() is not None:
+                        break
                     try:
+                        getattr(process, action)()
                         process.wait(timeout=5)
+                        break
                     except subprocess.TimeoutExpired:
-                        process.kill()
-                        process.wait(timeout=5)
+                        if action == "kill":
+                            print(f"WARNING: Browser PID {process.pid} did not exit after terminate/kill; "
+                                  "its process state may require inspection.", file=sys.stderr)
+                    except OSError as error:
+                        print(f"WARNING: Could not {action} browser PID {process.pid}: {error}", file=sys.stderr)
 
 
 def fetch_rules(rules):
@@ -181,10 +208,12 @@ def check_profile(browser, name, seat, gate, counter):
                   f"All gate, seat and counter labels agree for {name}")
 
 
-def check_account(browser, account):
+def check_account(browser, account, capture=False):
     _, name, seat, gate, counter = account
     browser.wait(APP_READY, f"{name}'s event pass")
     check_profile(browser, name, seat, gate, counter)
+    if capture:
+        browser.screenshot("desktop-dashboard")
     browser.check("document.querySelector('#menu-search').value === '' && "
                   "document.querySelector('[data-filter=all]').getAttribute('aria-pressed') === 'true' && "
                   f"{VISIBLE_ITEMS}.length === 4", "New accounts start with all menu items and empty search")
@@ -192,6 +221,8 @@ def check_account(browser, account):
     browser.click('.side-nav [data-go="seat"]')
     browser.check("location.hash === '#seat' && !document.querySelector('#view-seat').hidden",
                   "Seat navigation updates route and view")
+    if capture:
+        browser.screenshot("desktop-seat")
     browser.check("document.querySelectorAll('#seat-rows [data-seat]').length === 63 && "
                   "new Set(Array.from(document.querySelectorAll('[data-seat]')).map(node => node.dataset.seat)).size === 63 && "
                   "document.querySelectorAll('.seat-assigned').length === 1 && "
@@ -208,6 +239,8 @@ def check_account(browser, account):
                   "Locate button focuses and announces the assigned seat")
 
     browser.click('.side-nav [data-go="food"]')
+    if capture:
+        browser.screenshot("desktop-food")
     browser.evaluate("history.back()")
     browser.wait("location.hash === '#seat' && !document.querySelector('#view-seat').hidden",
                  "back navigation to seating")
@@ -249,6 +282,53 @@ def check_account(browser, account):
     print(f"PASS: {name} login, personalized pass, seats, menu, routes, refresh and logout", flush=True)
 
 
+def check_mobile_and_session_recovery(browser):
+    browser.call("Emulation.setDeviceMetricsOverride", width=390, height=844,
+                 deviceScaleFactor=1, mobile=True)
+    browser.call("Emulation.setTouchEmulationEnabled", enabled=True, maxTouchPoints=1)
+    no_overflow = "document.documentElement.clientWidth === 390 && document.documentElement.scrollWidth <= 390 && document.body.scrollWidth <= 390"
+    browser.check(no_overflow, "Mobile login has no document horizontal overflow")
+    browser.screenshot("mobile-login")
+    start_login(browser, *ACCOUNTS[0][:2])
+    browser.wait(APP_READY, "mobile sign-in")
+    browser.check("getComputedStyle(document.querySelector('.mobile-nav')).display !== 'none' && "
+                  "getComputedStyle(document.querySelector('.mobile-signout')).display !== 'none'",
+                  "Mobile navigation and sign-out controls are visible")
+    for route, filename in [("home", "dashboard"), ("seat", "seat"), ("food", "food")]:
+        browser.click(f'.mobile-nav [data-go="{route}"]')
+        browser.check(f"location.hash === '#{route}' && !document.querySelector('#view-{route}').hidden && "
+                      f"document.querySelector('.mobile-nav [data-go={route}]').getAttribute('aria-current') === 'page'",
+                      f"Mobile navigation opens {route}")
+        browser.check(no_overflow, f"Mobile {route} has no document horizontal overflow")
+        browser.screenshot(f"mobile-{filename}")
+
+    browser.check("fetch('/api/session', {method: 'DELETE'}).then(response => response.status === 204)",
+                  "The session can be expired independently of visible UI")
+    browser.reload(LOGIN_READY, "expired-session restoration")
+    browser.check("document.querySelector('#app-shell').hidden && location.hash === '#food' && "
+                  "document.querySelector('#retry-session').hidden && !document.querySelector('#login-error').textContent",
+                  "An expired session hides the pass and returns to login without a network-error retry")
+
+    start_login(browser, *ACCOUNTS[0][:2])
+    browser.wait(APP_READY, "sign-in after expiration")
+    script = browser.call("Page.addScriptToEvaluateOnNewDocument", source=fetch_rules([
+        {"path": "/api/session", "method": "GET", "effect": "reject"},
+    ]))["identifier"]
+    browser.reload(LOGIN_READY, "offline startup")
+    browser.check("document.querySelector('#app-shell').hidden && !document.querySelector('#retry-session').hidden && "
+                  "document.querySelector('#login-error').textContent.includes('Unable to connect')",
+                  "Offline startup shows a recoverable connection error")
+    browser.call("Page.removeScriptToEvaluateOnNewDocument", identifier=script)
+    browser.click("#retry-session")
+    browser.wait(APP_READY, "offline startup retry")
+    check_profile(browser, *ACCOUNTS[0][1:])
+    browser.click(".mobile-signout")
+    browser.wait(LOGIN_READY, "mobile sign-out")
+    browser.check("document.querySelector('#app-shell').hidden && location.hash === ''",
+                  "Mobile sign-out clears the pass and route")
+    print("PASS: mobile layout/navigation/sign-out, expired session and offline startup retry", flush=True)
+
+
 def run(browser, base_url):
     # The first session request is held before app.js runs, making the race deterministic.
     script = browser.call("Page.addScriptToEvaluateOnNewDocument", source=fetch_rules([
@@ -265,6 +345,7 @@ def run(browser, base_url):
     browser.evaluate("window.__smoke.pending.splice(0).forEach(release => release())")
     browser.wait(LOGIN_READY, "initial session check completion")
     browser.call("Page.removeScriptToEvaluateOnNewDocument", identifier=script)
+    browser.screenshot("desktop-login")
 
     browser.click(".login-submit")
     browser.check("document.querySelector('#login-error').textContent.length > 0 && document.activeElement.id === 'student-id'",
@@ -286,7 +367,7 @@ def run(browser, base_url):
             browser.check("window.__smoke.requests.filter(request => request.method === 'POST').length === 1",
                           "Duplicate submissions do not create another session")
             browser.evaluate("window.__smoke.pending.splice(0).forEach(release => release())")
-        check_account(browser, account)
+        check_account(browser, account, capture=index == 0)
 
     browser.evaluate(fetch_rules([{"path": "/api/menu", "method": "GET", "effect": "reject"}]))
     start_login(browser, *ACCOUNTS[0][:2])
@@ -311,6 +392,7 @@ def run(browser, base_url):
     browser.wait(LOGIN_READY, "logout retry")
     browser.reload(LOGIN_READY, "signed-out refresh")
     browser.check("document.querySelector('#app-shell').hidden", "Successful logout remains signed out after refresh")
+    check_mobile_and_session_recovery(browser)
     if browser.exceptions:
         raise AssertionError(f"Uncaught browser exceptions: {browser.exceptions}")
     print(f"PASS: delayed requests, duplicate submits, failed menu/logout recovery; {browser.checks} assertions", flush=True)
@@ -321,9 +403,13 @@ def main():
     parser.add_argument("base_url", nargs="?", default="http://localhost:8080")
     parser.add_argument("--chrome", default=shutil.which("google-chrome") or shutil.which("chromium")
                         or "/opt/google/chrome/chrome")
+    parser.add_argument("--timeout", type=float, default=30, help="CDP command and condition timeout in seconds (default: 30)")
+    parser.add_argument("--screenshots", type=Path, help="Save desktop/mobile login, dashboard, seat and food PNGs here")
     args = parser.parse_args()
+    if args.timeout <= 0:
+        parser.error("--timeout must be greater than zero")
     try:
-        with launch_browser(args.chrome) as browser:
+        with launch_browser(args.chrome, args.timeout, args.screenshots) as browser:
             run(browser, args.base_url)
     except (AssertionError, OSError, RuntimeError, websocket.WebSocketException) as error:
         print(f"FAIL: {error}", file=sys.stderr)

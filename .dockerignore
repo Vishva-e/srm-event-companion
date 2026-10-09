@@ -6,3 +6,5 @@
 target
 *.iml
 cookies.txt
+.venv
+**/__pycache__

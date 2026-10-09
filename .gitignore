@@ -6,3 +6,5 @@ target/
 .classpath
 .DS_Store
 cookies.txt
+.venv/
+__pycache__/

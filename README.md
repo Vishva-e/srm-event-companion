@@ -23,11 +23,13 @@ mvn spring-boot:run
 
 Open **http://localhost:8080** in your browser. This single Java service hosts the website *and* its API — there is no separate frontend server.
 
-Tests:
+API integration tests:
 
 ```bash
 mvn test
 ```
+
+For a clean build, all integration tests, and the executable JAR, run `mvn clean verify`.
 
 Package and run:
 
@@ -88,12 +90,36 @@ curl -b cookies.txt http://localhost:8080/api/seats
 curl -b cookies.txt http://localhost:8080/api/menu
 ```
 
+API errors have a consistent shape, for example:
+
+```json
+{"error":"NOT_SIGNED_IN","message":"Sign in with a demo account first."}
+```
+
+Invalid or malformed login bodies return `400`; unknown demo accounts or missing sessions return `401`. Unsupported methods return `405`, and unsupported request content types return `415`. API responses use `Cache-Control: no-store`.
+
+## Browser regression checks
+
+The optional browser checks exercise all three demo accounts, seat location, menu search/filtering, navigation, session restoration, and recovery from failed requests. They require Chrome/Chromium and Python 3 with `websocket-client`; these are test tools only, not application requirements.
+
+With the Spring Boot server running in another terminal:
+
+```bash
+python3 -m venv .venv
+.venv/bin/pip install websocket-client
+.venv/bin/python scripts/browser-smoke.py http://localhost:8080
+```
+
+Use `--chrome /path/to/chrome` if Chrome is not on your path. Add `--screenshots target/browser-smoke` to save desktop and mobile views, or `--timeout 60` for a slow machine. Checks run in a temporary browser profile and use only the fictional accounts above.
+
 ## 🗂️ Project structure
 
 ```text
 srm-event-companion/
 ├── pom.xml
 ├── Dockerfile
+├── .dockerignore
+├── scripts/browser-smoke.py
 ├── src/
 │   ├── main/
 │   │   ├── java/com/srm/eventcompanion/
