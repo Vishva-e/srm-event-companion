@@ -17,7 +17,8 @@ An **unofficial SRM-inspired student hackathon prototype** recreated from the fo
 **Prerequisites:** JDK 17 or newer and Apache Maven 3.9+ (or open `pom.xml` in IntelliJ IDEA and run `EventCompanionApplication`).
 
 ```bash
-cd srm-event-companion-java
+git clone https://github.com/Vishva-e/srm-event-companion.git
+cd srm-event-companion
 mvn spring-boot:run
 ```
 
@@ -44,6 +45,41 @@ You can deploy the resulting executable JAR to any hosting platform supporting a
 docker build -t srm-event-companion .
 docker run --rm -p 8080:8080 srm-event-companion
 ```
+
+## 🛠 Troubleshooting: index.html does not load
+
+**Use the Spring Boot server, not VS Code Live Server**. Open the terminal in the directory containing `pom.xml`:
+
+```bash
+git clone https://github.com/Vishva-e/srm-event-companion.git
+cd srm-event-companion
+java -version
+mvn -version
+mvn spring-boot:run
+```
+
+Wait for `Started EventCompanionApplication` in the terminal and open
+**http://localhost:8080/** (or **http://localhost:8080/index.html**).
+
+- **`cd: no such file or directory`**: After cloning the repository, the folder is named `srm-event-companion` by default. Do **not** use `srm-event-companion-java` unless you renamed it yourself.
+- **`mvn: command not found` / `mvn is not recognized`**: Install Apache Maven 3.9+ and add its `bin` directory to your PATH. Reopen the terminal, then run `mvn -version`.
+- **Wrong Java version**: Set `JAVA_HOME` to JDK 17+; check `java -version` and `mvn -version`.
+- **Port 8080 already in use**: Shut down the existing server or use `mvn spring-boot:run -Dspring-boot.run.arguments=--server.port=8081` and browse to `http://localhost:8081/`.
+- **404 Not Found**: Confirm you started the Java application from the repository root. The HTML is at `src/main/resources/static/index.html`, and Spring Boot serves it at the root path `/`.
+- **Blank UI / assets missing**: Open browser Developer Tools (F12) → Console and Network. Confirm `/app.js`, `/styles.css`, and `/assets/srm-inspired-mark.svg` return HTTP 200. Run `mvn clean spring-boot:run`, then reload with Ctrl+Shift+R.
+- **Java build errors**: Run `mvn clean test` and inspect the **first** error. The first build requires internet access to download dependencies.
+- **Do not open `index.html` via `file://`**: Login and seat/menu features require `/api/` endpoints on the Spring Boot server.
+
+You can verify the server from a second terminal:
+
+```bash
+curl -I http://localhost:8080/
+curl -I http://localhost:8080/index.html
+curl -I http://localhost:8080/styles.css
+curl -I http://localhost:8080/app.js
+```
+
+When all four return HTTP 200, try the demo account: `SRM2026001` / `Vishva`.
 
 ## 🔑 Demo student accounts
 
@@ -91,7 +127,7 @@ curl -b cookies.txt http://localhost:8080/api/menu
 ## 🗂️ Project structure
 
 ```text
-srm-event-companion-java/
+srm-event-companion/
 ├── pom.xml
 ├── Dockerfile
 ├── src/
