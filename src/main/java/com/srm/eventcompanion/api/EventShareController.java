@@ -69,6 +69,13 @@ public final class EventShareController {
             String scheme = uri.getScheme();
             if (scheme == null || (!scheme.equalsIgnoreCase("https") && !scheme.equalsIgnoreCase("http"))
                 || uri.getHost() == null || uri.getUserInfo() != null
+                || uri.getHost().equalsIgnoreCase("localhost")
+                || uri.getHost().equals("127.0.0.1")
+                || uri.getHost().equals("0.0.0.0")
+                || uri.getHost().equalsIgnoreCase("example.com")
+                || uri.getHost().equalsIgnoreCase("example.org")
+                || uri.getHost().equalsIgnoreCase("example.net")
+                || uri.getHost().toLowerCase(java.util.Locale.ROOT).endsWith(".example")
                 || uri.getQuery() != null || uri.getFragment() != null
                 || (uri.getPath() != null && uri.getPath().contains(".."))) {
                 throw new PublicUrlMissingException();

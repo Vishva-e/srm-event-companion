@@ -164,6 +164,8 @@ This demo checks *known sample values*, but **ID + username alone are not secure
 
 QR codes **open the website login page**, but do not log students in automatically. Never encode student IDs, usernames, passwords, or session tokens. This is an educational SRM-inspired demo only, not an authorised SRM identity service.
 
+The default value in `application.properties` is an intentionally non-working sample: `https://srm-event-companion.example/`. The QR endpoints deliberately refuse placeholder/sample and localhost addresses (503), so no invalid QR is shared. Set `APP_PUBLIC_URL` to the real HTTPS deployment URL to enable the QR.
+
 **Important:** `localhost` and GitHub repository URLs are NOT public website links. Deploy this Spring Boot application to a publicly reachable HTTPS domain, then set its external URL using the `APP_PUBLIC_URL` environment variable. Until then the QR page shows a configuration message rather than a misleading QR.
 
 PowerShell:
