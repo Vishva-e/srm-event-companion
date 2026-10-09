@@ -1,0 +1,60 @@
+name: Verify Spring Boot website
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build-and-smoke-test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v4
+      - name: Set up Java 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+          cache: maven
+      - name: Compile and run tests
+        run: mvn -B --no-transfer-progress clean verify
+      - name: Verify root/index static resources and demo APIs
+        shell: bash
+        run: |
+          set -euo pipefail
+          java -jar target/srm-event-companion-1.0.0.jar > /tmp/srm-app.log 2>&1 &
+          app_pid=$!
+          trap 'kill "$app_pid" 2>/dev/null || true' EXIT
+          ready=0
+          for attempt in $(seq 1 40); do
+            if curl --silent --fail http://127.0.0.1:8080/ -o /tmp/srm-homepage.html; then
+              ready=1
+              break
+            fi
+            if ! kill -0 "$app_pid" 2>/dev/null; then
+              cat /tmp/srm-app.log
+              exit 1
+            fi
+            sleep 2
+          done
+          if [ "$ready" -ne 1 ]; then cat /tmp/srm-app.log; exit 1; fi
+          grep -q 'SRM Event Companion' /tmp/srm-homepage.html
+          curl -fsS http://127.0.0.1:8080/index.html -o /tmp/srm-index.html
+          grep -q 'login-screen' /tmp/srm-index.html
+          curl -fsS http://127.0.0.1:8080/styles.css -o /tmp/srm-style.css
+          curl -fsS http://127.0.0.1:8080/app.js -o /tmp/srm-app.js
+          test -s /tmp/srm-style.css
+          test -s /tmp/srm-app.js
+          curl -fsS -c /tmp/srm-cookies.txt -H 'Content-Type: application/json' \
+            -d '{"studentId":"SRM2026001","username":"Vishva"}' \
+            http://127.0.0.1:8080/api/session -o /tmp/srm-session.json
+          grep -q 'E07' /tmp/srm-session.json
+          curl -fsS -b /tmp/srm-cookies.txt http://127.0.0.1:8080/api/seats -o /tmp/srm-seats.json
+          curl -fsS -b /tmp/srm-cookies.txt http://127.0.0.1:8080/api/menu -o /tmp/srm-menu.json
+          grep -q 'YOURS' /tmp/srm-seats.json
+          grep -q 'Veg meals' /tmp/srm-menu.json
+          echo 'PASS: /, /index.html, CSS, JS, login, seats, menu'
