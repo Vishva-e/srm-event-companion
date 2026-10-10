@@ -6,10 +6,10 @@ An **unofficial SRM-inspired student hackathon prototype** recreated from the fo
 
 ## 📦 Tech stack
 
-- **Backend:** Java 17+, Spring Boot 3.5.6, Spring Web MVC, Jakarta Bean Validation, HTTP session
+- **Backend:** Java 17+, Spring Boot 3.5.6, Spring Web MVC, Spring JDBC, Jakarta Bean Validation, HTTP session
 - **Frontend:** Semantic HTML5, responsive CSS3, vanilla JavaScript (`fetch`, DOM rendering). No Node/npm required.
-- **Data:** In-memory demo accounts and event/menu fixtures; no external database
-- **Testing:** JUnit 5 + Spring `MockMvc` integration tests
+- **Data:** Embedded, file-backed H2 database for demo students, seats, food counters and menus
+- **Testing:** JUnit 5 + Spring `MockMvc` integration tests with an isolated in-memory H2 database
 - **Branding:** University-inspired blue `#084298` and heritage gold `#E1B052` from the concept design
 
 ## ▶️ Run locally
@@ -41,12 +41,31 @@ java -jar target/srm-event-companion-1.0.0.jar
 
 You can deploy the resulting executable JAR to any hosting platform supporting a Java server. Configure `PORT` when required (the default is 8080).
 
+### Database setup and schema
+
+H2 runs inside the application; no separate database installation is needed. The default database is stored at `./data/srm-event-companion`, relative to the directory where the app starts. Startup creates missing tables and inserts missing demo rows while preserving existing records and edits on subsequent starts. Student assignments, seat occupancy, food counters and menu items persist across restarts; HTTP sessions remain in memory, so users must sign in again after a restart.
+
+| Table | Columns |
+|---|---|
+| `students` | `student_id`, `student_name`, `seat_code`, `entry_gate`, `counter_number` |
+| `seats` | `seat_code`, `row_label`, `seat_number`, `occupied` |
+| `food_counters` | `counter_number`, `floor`, `zone`, `near_gate` |
+| `menu_items` | `item_id`, `name`, `description`, `category`, `diet_label`, `badge`, `art_style`, `price_inr`, `display_order` |
+
+`students.seat_code` is unique and references `seats.seat_code`; `students.counter_number` references `food_counters.counter_number`. A seat is occupied when it is assigned to another student or its `occupied` flag is set. The current student's assignment appears as `YOURS`.
+
+Set `APP_DB_URL` to override the H2 database location. Optional database authentication overrides are read from `APP_DB_USERNAME` and `APP_DB_PASSWORD` environment variables; keep their values outside source files and documentation. The H2 console is disabled by default.
+
+Run one application process per file database. On hosts with an ephemeral filesystem, mount a persistent volume for the `data` directory so deployments retain database records.
+
 ### Docker
 
 ```bash
 docker build -t srm-event-companion .
-docker run --rm -p 8080:8080 srm-event-companion
+docker run --rm -p 8080:8080 -v srm-event-data:/app/data srm-event-companion
 ```
+
+The named Docker volume retains the H2 database when the container is replaced.
 
 ## 🛠 Troubleshooting: index.html does not load
 
@@ -95,7 +114,7 @@ Use **only** these fictional identities. Names must match the corresponding samp
 
 ## ✅ Functional features
 
-1. **Student demo login:** Enter ID and username. Spring Boot validates input and matches it against an in-memory list of fictitious profiles.
+1. **Student demo login:** Enter ID and username. Spring Boot validates input and matches it against the fictitious profiles stored in H2.
 2. **Session-backed dashboard:** Server responds with personalised event pass, assigned seat and food counter; refresh restores your server session until it expires after 30 minutes of inactivity.
 3. **Cinema-style seating:** Java API serves a 7-row × 9-seat auditorium map. Your seat is **highlighted gold**. Available and occupied seats are visually distinct. **Locate my seat** scrolls/highlights the assigned spot.
 4. **Food counters:** Java API serves the assigned food counter and four menu items with prices in INR. Client-side filters and search work across the API data.
@@ -182,7 +201,7 @@ This demo checks *known sample values*, but **ID + username alone are not secure
 ## Notes
 
 - CSS uses Google Fonts if reachable, with system-font fallbacks.
-- Each server restart clears demo sessions but not hardcoded fixtures.
+- Each server restart clears demo sessions and retains database records when the database files are preserved.
 - The sample event date and prices are illustrative, not a verified event listing.
 - Maven builds require an internet connection the first time to download Spring dependencies.
 

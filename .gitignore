@@ -8,3 +8,7 @@ target/
 cookies.txt
 .venv/
 __pycache__/
+data/
+*.mv.db
+*.trace.db
+*.lock.db
