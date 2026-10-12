@@ -7,3 +7,4 @@ Pending official inputs: Graduation date/time, permitted university logo, offici
 Privacy and safety: Demo account IDs only, no production SSO. Guest counts exist only in the HTTP session. GPS coordinates remain in browser and are used only to construct Google Maps directions when student chooses a link. Map searches are not verified indoor routes.
 
 Venue source: SRMIST lists Dr. T. P. Ganesan Auditorium in their booking information. Before the event, obtain organizers' final venue information and approved public website URL.
+Added: session-only document requirement selector (event pass, graduation certificate, other). It is NOT a submitted/approved SRM request. Removed sample food price display from frontend cards while preserving database price fields for older API compatibility.

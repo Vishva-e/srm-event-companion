@@ -252,3 +252,12 @@ svg{display:block}
 .grad-modal-note{text-align:center;font-size:10px!important}
 @media(max-width:920px){.grad-places{grid-template-columns:repeat(2,minmax(0,1fr))}.grad-location-banner{flex-wrap:wrap}}
 @media(max-width:560px){.grad-places,.graduation-shortcuts{grid-template-columns:1fr}.grad-location-banner{align-items:stretch}.grad-location-banner div{flex-basis:100%}.grad-modal-panel{padding:23px 19px}}
+
+.grad-document-card{background:white;border:1px solid #dbe6f3;border-radius:16px;padding:19px 22px;margin:20px 0;display:grid;grid-template-columns:1fr auto;gap:10px 25px;align-items:center}
+.grad-document-card strong{color:#153760;font-size:15px}.grad-document-card p{font-size:12px;color:#7286a0;line-height:1.6}
+.grad-document-card form{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.grad-document-card label{font-size:11px;font-weight:800;color:#335579}
+.grad-document-card select{background:#f5f8fd;color:#24486e;border:1px solid #d0dff0;border-radius:9px;padding:11px}
+.grad-document-card button{background:#084298;color:white;border:0;border-radius:9px;padding:12px;cursor:pointer;font-size:12px;font-weight:700}
+#document-status{grid-column:1/-1;margin:0}
+@media(max-width:760px){.grad-document-card{grid-template-columns:1fr}}

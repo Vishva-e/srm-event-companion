@@ -87,6 +87,30 @@ public final class EventApiController {
                 demo.passFor(studentId).registrationCounter().number()));
     }
 
+    /** Session-only document interest request: not submitted to an SRM university service. */
+    @GetMapping("/documents")
+    public ResponseEntity<DocumentRequestDetails> documentRequest(HttpServletRequest request) {
+        requireUser(request);
+        HttpSession session = request.getSession(false);
+        String type = session.getAttribute("demoDocumentType") instanceof String text ? text : "";
+        return noStore(new DocumentRequestDetails(type, type.isEmpty() ? "NOT_REQUESTED" : "DEMO_SAVED"));
+    }
+
+    @PostMapping("/documents")
+    public ResponseEntity<DocumentRequestDetails> saveDocumentRequest(
+            @Valid @RequestBody DocumentRequestInput input, HttpServletRequest request) {
+        requireUser(request);
+        HttpSession session = request.getSession(false);
+        session.setAttribute("demoDocumentType", input.type());
+        return noStore(new DocumentRequestDetails(input.type(), "DEMO_SAVED"));
+    }
+
+    public record DocumentRequestInput(
+            @jakarta.validation.constraints.NotBlank
+            @jakarta.validation.constraints.Pattern(regexp = "EVENT_PASS|GRADUATION_CERTIFICATE|OTHER")
+            String type) { }
+    public record DocumentRequestDetails(String type, String status) { }
+
     private String requireUser(HttpServletRequest request) {
         HttpSession session = request.getSession(false);
         Object value = session == null ? null : session.getAttribute(SESSION_KEY);

@@ -139,6 +139,10 @@ function showApp(profile, { seats, menu }, navigate = 'home') {
   loginScreen.hidden = true;
   appShell.hidden = false;
   renderRoute(navigate, true);
+  api('documents').then(d => {
+    if (d.type) $('#document-type').value = d.type;
+    setText('#document-status', d.status === 'DEMO_SAVED' ? 'Your sample document preference is saved for this session.' : 'No document request saved yet.');
+  }).catch(() => setText('#document-status', 'Document demo request unavailable.'));
   api('attendees').then(info => {
     $('#attendee-count').value = info.accompanyingMembers;
     setText('#attendee-summary', `Accompanying members: ${info.accompanyingMembers} · Total: ${info.totalAttendees}`);
@@ -252,7 +256,7 @@ function renderMenu(payload) {
     artwork.append(artIcon, make('span', '', item.badge));
     const content = make('div', 'menu-content');
     const top = make('div', 'menu-topline');
-    top.append(make('span', 'menu-type', item.dietLabel), make('span', 'menu-price', `₹${item.priceInr}`));
+    top.append(make('span', 'menu-type', item.dietLabel));
     content.append(top, make('h3', '', item.name), make('p', '', item.description));
     card.append(artwork, content);
     container.appendChild(card);
@@ -376,6 +380,21 @@ const preview = $('#hero-preview-seats');
 for (let i = 0; i < 27; i++) {
   preview.appendChild(make('span', `mini-seat${i === 22 ? ' mini-seat-highlighted' : ''}`));
 }
+
+// Document request is saved only in the session. No official processing is performed.
+$('#document-form').addEventListener('submit', async e => {
+  e.preventDefault();
+  const button=$('#document-form button');
+  button.disabled=true;
+  try {
+    const data=await api('documents', {method:'POST',
+      body:JSON.stringify({type:$('#document-type').value})});
+    setText('#document-status',data.status === 'DEMO_SAVED'
+      ? 'Saved for this demo session — NOT submitted to SRM University.'
+      : 'Could not save the document preference.');
+  } catch(error) {setText('#document-status',error.message);}
+  finally {button.disabled=false;}
+});
 
 // Graduation Day attendee popup and map search actions.
 function showStudentModal() {
