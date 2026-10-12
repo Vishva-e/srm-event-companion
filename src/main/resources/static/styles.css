@@ -261,3 +261,11 @@ svg{display:block}
 .grad-document-card button{background:#084298;color:white;border:0;border-radius:9px;padding:12px;cursor:pointer;font-size:12px;font-weight:700}
 #document-status{grid-column:1/-1;margin:0}
 @media(max-width:760px){.grad-document-card{grid-template-columns:1fr}}
+
+/* Original uploaded SRM Online Education horizontal logo (transparent image). */
+.login-brand.brand{display:flex;align-items:center;min-width:0;max-width:100%}
+.login-brand .srm-online-logo{display:block;width:min(100%,390px);height:auto;object-fit:contain}
+.sidebar-brand .srm-online-logo{display:block;width:174px;max-width:100%;height:auto;object-fit:contain}
+.mobile-brand .srm-online-logo{display:block;width:min(214px,51vw);height:auto;object-fit:contain}
+.ticket-head .srm-online-logo{display:block;width:min(195px,50%);height:auto;object-fit:contain}
+@media(max-width:520px){.login-brand .srm-online-logo{width:min(100%,320px)}.mobile-brand .srm-online-logo{width:min(175px,50vw)}.ticket-head .srm-online-logo{width:min(155px,49%)}}

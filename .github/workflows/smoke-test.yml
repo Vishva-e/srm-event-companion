@@ -53,6 +53,8 @@ jobs:
           curl -fsS http://127.0.0.1:8080/app.js -o /tmp/srm-app.js
           test -s /tmp/srm-style.css
           test -s /tmp/srm-app.js
+          curl -fsS http://127.0.0.1:8080/assets/srm-online-logo.png -o /tmp/srm-logo.png
+          file /tmp/srm-logo.png | grep -q 'PNG image data'
           curl -fsS -c /tmp/srm-cookies.txt -H 'Content-Type: application/json' \
             -d '{"studentId":"SRM2026001","username":"Vishva"}' \
             http://127.0.0.1:8080/api/session -o /tmp/srm-session.json

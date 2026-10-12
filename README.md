@@ -87,7 +87,7 @@ Wait for `Started EventCompanionApplication` in the terminal and open
 - **Wrong Java version**: Set `JAVA_HOME` to JDK 17+; check `java -version` and `mvn -version`.
 - **Port 8080 already in use**: Shut down the existing server or use `mvn spring-boot:run -Dspring-boot.run.arguments=--server.port=8081` and browse to `http://localhost:8081/`.
 - **404 Not Found**: Confirm you started the Java application from the repository root. The HTML is at `src/main/resources/static/index.html`, and Spring Boot serves it at the root path `/`.
-- **Blank UI / assets missing**: Open browser Developer Tools (F12) → Console and Network. Confirm `/app.js`, `/styles.css`, and `/assets/srm-inspired-mark.svg` return HTTP 200. Run `mvn clean spring-boot:run`, then reload with Ctrl+Shift+R.
+- **Blank UI / assets missing**: Open browser Developer Tools (F12) → Console and Network. Confirm `/app.js`, `/styles.css`, and `/assets/srm-online-logo.png` return HTTP 200. Run `mvn clean spring-boot:run`, then reload with Ctrl+Shift+R.
 - **Java build errors**: Run `mvn clean test` and inspect the **first** error. The first build requires internet access to download dependencies.
 - **Do not open `index.html` via `file://`**: Login and seat/menu features require `/api/` endpoints on the Spring Boot server.
 
@@ -243,3 +243,7 @@ Endpoints:
 - `GET /api/share/qr.png` — server-generated 480×480 scannable PNG using ZXing.
 
 If the public URL isn't configured, both API endpoints return 503 `PUBLIC_URL_NOT_CONFIGURED`. The QR image is created locally in Java with no third-party QR web service. Scan-test on a separate phone before distributing.
+
+## Updated SRM Online Education branding
+
+The supplied SRM Online Education (KTR – Chennai) horizontal logo is stored as `src/main/resources/static/assets/srm-online-logo.png` and used in the sign-in hero, sidebar, mobile header, digital pass, and public QR page. It is a user-provided transparent PNG; avoid recreating the seal as text. The older SRM-inspired graphic remains an unused legacy asset. The prototype is not an official SRM authentication service; university branding/public use still requires appropriate organizer permission.
