@@ -11,12 +11,14 @@ const loginScreen = $('#login-screen');
 const appShell = $('#app-shell');
 const loginForm = $('#login-form');
 const loginError = $('#login-error');
-const views = { home: $('#view-home'), seat: $('#view-seat'), food: $('#view-food') };
+const views = { home: $('#view-home'), seat: $('#view-seat'), food: $('#view-food'), campus: $('#view-campus') };
 
 let currentUser = null;
 let currentPass = null;
 let activeFilter = 'all';
 let sessionBusy = false;
+let graduationLocationWatch = null;
+let graduationPosition = null;
 
 async function api(path, options = {}) {
   const controller = new AbortController();
@@ -60,7 +62,7 @@ function applyProfile({ student, event }) {
   currentPass = event;
   const first = welcomeName(student.name);
   const seat = event.seat;
-  const counter = event.foodCounter;
+  const counter = event.registrationCounter || event.foodCounter;
   const seatLabel = `Row ${seat.row} · Seat ${String(seat.number).padStart(2, '0')}`;
 
   setText('#welcome-name', first);
@@ -72,41 +74,46 @@ function applyProfile({ student, event }) {
   setText('.nav-indicator', seat.code);
   setText('.sidebar-event-bottom b', seat.code);
   setText('.sidebar-event > strong', event.name);
-  setText('#sidebar-event-location', `${event.venue}\nBlock ${event.block} · Gate ${event.entryGate}`);
+  setText('#sidebar-event-location', `${event.venue}\nBlock ${event.block}`);
   setText('.ticket-title h2', event.name);
   setText('.ticket-title p', `${event.venue} · Block ${event.block}`);
   setText('.ticket-stats div:nth-child(1) strong', seat.code);
-  setText('.ticket-stats div:nth-child(2) strong', event.entryGate);
+  setText('.ticket-stats div:nth-child(2) strong', event.block);
   setText('.ticket-stats div:nth-child(3) strong', counter.number);
   setText('#event-date-heading', event.date.toUpperCase());
   setText('#event-date', event.date);
   setText('#event-venue', `${event.venue}, Block ${event.block}`);
-  setText('#event-entry', `Gate ${event.entryGate} · Level ${event.level}`);
+  setText('#event-entry', `Level ${event.level} · Row ${seat.row}`);
   setText('.quick-card[data-go="seat"] .quick-copy small', `${seatLabel} · Block ${event.block}`);
   setText('.quick-card[data-go="food"] .quick-copy small', `Counter ${counter.number} · ${counter.floor}`);
 
   setText('#view-seat .page-heading .section-kicker', `BLOCK ${event.block} • LEVEL ${event.level}`);
-  setText('.theatre-hint', `Front view · Entry Gate ${event.entryGate}`);
+  setText('.theatre-hint', 'Front view · Assigned seating');
   setText('.theatre-head h2', `Block ${event.block} Seating`);
   setText('.theatre-kicker', event.venue.toUpperCase());
   setText('.level-badge', `LEVEL ${event.level}`);
   setText('.seat-badge', seat.code);
   setText('.your-seat-number h2', seatLabel);
   setText('.assigned-details div:nth-child(1) strong', event.block);
-  setText('.assigned-details div:nth-child(2) strong', event.entryGate);
+  setText('.assigned-details div:nth-child(2) strong', seat.row);
   setText('.assigned-details div:nth-child(3) strong', event.level);
-  setText('.directions-card li:nth-child(1) b', `Enter through Gate ${event.entryGate}`);
-  setText('.directions-card li:nth-child(1) span', `Proceed to Block ${event.block}, Level ${event.level}.`);
+  setText('.directions-card li:nth-child(1) b', 'Reach the auditorium');
+  setText('.directions-card li:nth-child(1) span', `Proceed to ${event.venue}, Level ${event.level}.`);
   setText('.directions-card li:nth-child(2) b', `Find Row ${seat.row}`);
   setText('.directions-card li:nth-child(3) b', `Look for Seat ${String(seat.number).padStart(2, '0')}`);
   setText('#seat-notice', `Your assigned seat is ${seatLabel}. Other seats are shown for reference only.`);
 
   setText('.counter-display > b', counter.number);
-  setText('.counter-display h2', `Food Counter ${counter.number}`);
+  setText('.counter-display h2', `Registration Counter ${counter.number}`);
   setText('.counter-display p', `${counter.floor} • ${counter.zone}`);
-  setText('.counter-nearby-text', `Near ${event.venue} · Gate ${counter.nearGate}`);
+  setText('.counter-nearby-text', 'Demo counter assignment · desk location to be confirmed');
   setText('.counter-mark b', counter.number);
   setText('.counter-mark span:last-child', counter.zone.toUpperCase());
+  setText('#student-modal-name', student.name);
+  setText('#profile-id', student.id);
+  setText('#profile-netid', student.netId || 'Not set');
+  setText('#profile-seat', seat.code);
+  setText('#profile-counter', counter.number);
 }
 
 function resetAccountState() {
@@ -132,11 +139,17 @@ function showApp(profile, { seats, menu }, navigate = 'home') {
   loginScreen.hidden = true;
   appShell.hidden = false;
   renderRoute(navigate, true);
+  api('attendees').then(info => {
+    $('#attendee-count').value = info.accompanyingMembers;
+    setText('#attendee-summary', `Accompanying members: ${info.accompanyingMembers} · Total: ${info.totalAttendees}`);
+  }).catch(() => setText('#attendee-summary', 'Guest count unavailable'));
 }
 
 function showLogin({ focus = true, preserveRoute = false, resetForm = true } = {}) {
   currentUser = null;
   currentPass = null;
+  hideStudentModal();
+  stopGraduationLocation();
   resetAccountState();
   appShell.hidden = true;
   loginScreen.hidden = false;
@@ -159,7 +172,7 @@ function renderRoute(route, focus = false) {
     if (active) button.setAttribute('aria-current', 'page');
     else button.removeAttribute('aria-current');
   });
-  const titles = { home: 'Dashboard', seat: 'My seat', food: 'Food counters' };
+  const titles = { home: 'Dashboard', seat: 'My seat', food: 'Registration & food', campus: 'Campus guide' };
   setText('#breadcrumb-current', titles[page]);
   document.title = `${titles[page]} · SRM Event Companion`;
   if (location.hash !== `#${page}`) history.replaceState({ route: page }, '', `#${page}`);
@@ -231,7 +244,7 @@ function renderMenu(payload) {
   container.replaceChildren();
   for (const item of payload.items) {
     const card = make('article', 'menu-card');
-    card.dataset.category = item.category;
+    card.dataset.category = item.category === 'nonveg' || item.artStyle === 'nonveg' ? 'nonveg' : 'veg';
     card.dataset.search = `${item.name} ${item.description} ${item.dietLabel}`.toLocaleLowerCase();
     const artwork = make('div', `menu-art menu-art-${item.artStyle}`);
     const artIcon = make('span', 'menu-illustration', illustration[item.artStyle] ?? '✦');
@@ -280,6 +293,7 @@ loginForm.addEventListener('submit', async (event) => {
     const data = await loadAppData();
     history.replaceState({ route: 'home' }, '', '#home');
     showApp(profile, data);
+    showStudentModal();
   } catch (error) {
     showLogin({ focus: false, resetForm: false });
     loginError.textContent = signedIn && error.status !== 401
@@ -362,6 +376,78 @@ const preview = $('#hero-preview-seats');
 for (let i = 0; i < 27; i++) {
   preview.appendChild(make('span', `mini-seat${i === 22 ? ' mini-seat-highlighted' : ''}`));
 }
+
+// Graduation Day attendee popup and map search actions.
+function showStudentModal() {
+  if (!currentUser) return;
+  $('#student-modal').hidden = false;
+  $('#attendee-count').focus({preventScroll:true});
+}
+function hideStudentModal() {
+  $('#student-modal').hidden = true;
+  $('#attendee-error').textContent = '';
+}
+$('#open-student-profile').addEventListener('click',showStudentModal);
+$('#close-student-profile').addEventListener('click',hideStudentModal);
+$('#student-modal').addEventListener('click',e => {if(e.target === $('#student-modal')) hideStudentModal();});
+document.addEventListener('keydown',e => {if(e.key==='Escape' && !$('#student-modal').hidden)hideStudentModal();});
+$('#attendee-form').addEventListener('submit',async e => {
+  e.preventDefault();
+  const count=Number($('#attendee-count').value);
+  if(!Number.isInteger(count) || count<0 || count>10) {
+    setText('#attendee-error','Enter a whole number between 0 and 10.');
+    return;
+  }
+  const button=$('#attendee-form button');
+  button.disabled=true;
+  try {
+    const answer=await api('attendees',{method:'PUT',body:JSON.stringify({accompanyingMembers:count})});
+    setText('#attendee-summary','Accompanying members: '+answer.accompanyingMembers+' · Total: '+answer.totalAttendees);
+    hideStudentModal();
+  } catch(error) {setText('#attendee-error',error.message);}
+  finally {button.disabled=false;}
+});
+function setGraduationLinks() {
+  for (const a of $('.grad-map-link')) {
+    const url=new URL(graduationPosition?'https://www.google.com/maps/dir/':'https://www.google.com/maps/search/');
+    url.searchParams.set('api','1');
+    if(graduationPosition) {
+      url.searchParams.set('origin',graduationPosition.latitude+','+graduationPosition.longitude);
+      url.searchParams.set('destination',a.dataset.place);
+      url.searchParams.set('travelmode','walking');
+    } else url.searchParams.set('query',a.dataset.place);
+    a.href=url.href;a.target='_blank';a.rel='noopener noreferrer';
+  }
+}
+function stopGraduationLocation() {
+  if(graduationLocationWatch!==null && navigator.geolocation)navigator.geolocation.clearWatch(graduationLocationWatch);
+  graduationLocationWatch=null;
+  graduationPosition=null;
+  $('#disable-location').disabled=true;
+  setText('#location-status','Location is off. Map searches still work.');
+  setGraduationLinks();
+}
+setGraduationLinks();
+$('#enable-location').addEventListener('click',()=>{
+  if(!navigator.geolocation || !window.isSecureContext) {
+    setText('#location-status','Live location requires HTTPS (or localhost) and browser support.');
+    return;
+  }
+  stopGraduationLocation();
+  setText('#location-status','Waiting for location permission…');
+  graduationLocationWatch=navigator.geolocation.watchPosition(
+    p=>{
+      graduationPosition={latitude:p.coords.latitude,longitude:p.coords.longitude};
+      setGraduationLinks();
+      $('#disable-location').disabled=false;
+      setText('#location-status','Live location active (±'+Math.round(p.coords.accuracy)+' m). Open directions to use your starting point.');
+    },err=>{
+      if(err.code===1)stopGraduationLocation();
+      setText('#location-status','Location unavailable or declined. Campus searches still work.');
+    },{enableHighAccuracy:true,timeout:16000,maximumAge:10000});
+});
+$('#disable-location').addEventListener('click',stopGraduationLocation);
+window.addEventListener('pagehide',stopGraduationLocation);
 
 // Serialize session changes so a slow restore cannot overwrite a new sign-in.
 async function restoreSession() {

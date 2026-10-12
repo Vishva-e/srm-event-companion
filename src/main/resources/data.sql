@@ -47,3 +47,17 @@ FROM (VALUES
     ('lime-juice', 'Fresh lime juice', 'Chilled refreshment', 'drinks', 'COLD BEVERAGE · DRINKS', 'DRINK', 'drink', 50, 4)
 ) AS seed(item_id, name, description, category, diet_label, badge, art_style, price_inr, display_order)
 WHERE NOT EXISTS (SELECT 1 FROM menu_items existing WHERE existing.item_id = seed.item_id);
+
+-- Convert only original sample menu rows into a South Indian veg/non-veg prototype.
+UPDATE menu_items SET category='veg',diet_label='VEGETARIAN · SOUTH INDIAN',
+    description='South Indian rice with sambar, rasam and vegetables'
+WHERE item_id='veg-meals' AND name='Veg meals' AND category='meals';
+UPDATE menu_items SET category='nonveg',diet_label='NON-VEGETARIAN · SOUTH INDIAN',
+    description='South Indian-style chicken rice'
+WHERE item_id='chicken-rice' AND name='Chicken rice' AND category='meals';
+UPDATE menu_items SET name='Masala dosa',category='veg',badge='VEG',art_style='veg',
+    diet_label='VEGETARIAN · SOUTH INDIAN',description='Dosa with potato filling'
+WHERE item_id='paneer-wrap' AND name='Paneer wrap';
+UPDATE menu_items SET name='Egg dosa',category='nonveg',badge='NON-VEG',art_style='nonveg',
+    diet_label='NON-VEGETARIAN · SOUTH INDIAN',description='Egg dosa, South Indian style'
+WHERE item_id='lime-juice' AND name='Fresh lime juice';
