@@ -219,3 +219,36 @@ svg{display:block}
   .main-content{padding-left:13px;padding-right:13px}.seat-row{gap:4px}.seat{height:23px}.theatre-legend{gap:8px}.theatre-legend>span{font-size:8px}.theatre-panel{padding:19px 12px}.event-info{gap:1px}.quick-card{gap:9px}.quick-icon{height:48px;width:48px}.quick-arrow{font-size:18px}
 }
 @media (prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;scroll-behavior:auto!important;transition-duration:.01ms!important}}
+
+/* Graduation Day additions */
+.graduation-shortcuts{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:13px;margin:18px 0 8px}
+.grad-shortcut{border:1px solid #dce6f2;background:white;border-radius:14px;padding:19px;color:#084298;font-weight:800;text-align:left;cursor:pointer;font:inherit}
+.grad-shortcut:hover{background:#eef5ff}.grad-attendees{color:#55738f;font-size:12px}
+.grad-location-banner{display:flex;align-items:center;gap:14px;background:#0a2c61;color:white;border-radius:17px;padding:22px;margin:15px 0}
+.grad-location-banner div{flex:1}.grad-location-banner strong{font-size:17px}.grad-location-banner p{font-size:12px;line-height:1.6;color:#d9e5f5;margin:6px 0 0}
+.grad-location-banner button{padding:11px 15px;border-radius:10px;white-space:nowrap;font-size:12px;cursor:pointer}
+.grad-location-banner #disable-location{background:transparent;border:1px solid #c4d5ed;color:white}
+.grad-location-banner button:disabled{opacity:.5;cursor:not-allowed}
+.grad-location-status{color:#567190;font-size:12px;margin:14px 0 20px}
+.grad-places{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:15px}
+.grad-places article{min-width:0;background:white;border:1px solid #dfe7f2;border-radius:15px;padding:22px;display:flex;flex-direction:column;gap:8px}
+.grad-places article>span{font-size:10px;font-weight:800;letter-spacing:1px;color:#295b9e}
+.grad-places h2{font-size:16px;color:#15345d;margin:6px 0 0}
+.grad-places p{font-size:12px;color:#7586a0;line-height:1.6;flex:1}
+.grad-places a{font-size:13px;color:#084298;font-weight:800;text-decoration:none;border-top:1px solid #e7edf7;padding-top:13px}
+.grad-map-warning{font-size:12px;line-height:1.7;color:#6d829c}
+.grad-modal[hidden]{display:none!important}
+.grad-modal{position:fixed;inset:0;z-index:200;background:#071b3fbb;display:grid;place-items:center;padding:18px;overflow-y:auto}
+.grad-modal-panel{width:min(100%,520px);max-height:calc(100vh - 36px);overflow-y:auto;background:white;border-radius:23px;padding:28px;position:relative;box-shadow:0 30px 90px #071c4355}
+.grad-modal-panel>span{color:#084298;font-size:11px;font-weight:900;letter-spacing:1.2px}
+.grad-modal-panel h2{font-size:27px;color:#102f60;margin:14px 0 8px}
+.grad-modal-panel>p{color:#788aa1;font-size:12px;line-height:1.7}
+.grad-modal-x{position:absolute;right:18px;top:18px;background:#eef3fa;border:0;border-radius:50%;width:37px;height:37px;font-size:26px;cursor:pointer}
+.grad-profile-grid{display:grid;grid-template-columns:1fr 1fr;gap:15px;background:#f4f7fc;padding:19px;border-radius:13px;margin:21px 0}
+.grad-profile-grid div{display:grid;gap:5px;min-width:0}.grad-profile-grid small{color:#8593ab;font-size:10px;font-weight:800}.grad-profile-grid strong{font-size:14px;color:#0b4188;overflow-wrap:anywhere}
+#attendee-form{display:grid;gap:11px}#attendee-form label{font-size:13px;font-weight:800;color:#28466b}
+#attendee-count{padding:13px 14px;border:1px solid #cbd7e6;border-radius:10px;width:100%;font-size:16px}
+#attendee-form .primary-btn{justify-content:center;cursor:pointer}
+.grad-modal-note{text-align:center;font-size:10px!important}
+@media(max-width:920px){.grad-places{grid-template-columns:repeat(2,minmax(0,1fr))}.grad-location-banner{flex-wrap:wrap}}
+@media(max-width:560px){.grad-places,.graduation-shortcuts{grid-template-columns:1fr}.grad-location-banner{align-items:stretch}.grad-location-banner div{flex-basis:100%}.grad-modal-panel{padding:23px 19px}}

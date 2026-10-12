@@ -22,6 +22,8 @@ jobs:
           cache: maven
       - name: Compile and run tests
         run: mvn -B --no-transfer-progress clean verify
+      - name: Check JavaScript syntax
+        run: node --check src/main/resources/static/app.js
       - name: Verify root/index static resources and demo APIs
         shell: bash
         env:
