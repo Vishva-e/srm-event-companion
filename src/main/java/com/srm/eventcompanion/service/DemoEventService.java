@@ -40,8 +40,9 @@ public final class DemoEventService {
     }
 
     private EventPass passFor(StudentAssignment a) {
-        return new EventPass("SRM INNOVATE 2026", "08 October 2026",
-                "Main Auditorium", "A", "01", a.gate(), a.seat(), a.counter());
+        return new EventPass("SRM GRADUATION DAY", "Date to be confirmed",
+                "Dr. T. P. Ganesan Auditorium", "A", "01", a.gate(), a.seat(), a.counter(),
+                new RegistrationCounter(a.counter().number(), a.counter().floor(), a.counter().zone()));
     }
 
     public SeatMap seatsFor(String studentId) {
@@ -49,7 +50,7 @@ public final class DemoEventService {
         List<Seat> seats = events.findSeats(mine.code());
         List<String> rows = seats.stream().map(Seat::row).distinct().toList();
         int seatsPerRow = seats.stream().mapToInt(Seat::number).max().orElse(0);
-        return new SeatMap("Main Auditorium", seatsPerRow, rows, seats);
+        return new SeatMap("Dr. T. P. Ganesan Auditorium", seatsPerRow, rows, seats);
     }
 
     public MenuResponse menuFor(String studentId) {

@@ -25,13 +25,13 @@ public class EventRepository {
                 FROM students student
                 JOIN seats seat ON seat.seat_code = student.seat_code
                 JOIN food_counters counter ON counter.counter_number = student.counter_number
-                WHERE student.student_id = ?
+                WHERE UPPER(student.student_id) = ? OR LOWER(CONCAT(REPLACE(student.student_name, ' ', ''), '.demo')) = LOWER(?)
                 """, (rs, rowNum) -> new StudentAssignment(
-                new Student(rs.getString("student_id"), rs.getString("student_name")),
+                new Student(rs.getString("student_id"), rs.getString("student_name"), rs.getString("student_name").toLowerCase(java.util.Locale.ROOT).replace(" ", "") + ".demo"),
                 new SeatAssignment(rs.getString("row_label"), rs.getInt("seat_number"), rs.getString("seat_code")),
                 rs.getString("entry_gate"),
                 new FoodCounter(rs.getString("counter_number"), rs.getString("floor"),
-                        rs.getString("zone"), rs.getString("near_gate"))), studentId).stream().findFirst();
+                        rs.getString("zone"), rs.getString("near_gate"))), studentId, studentId).stream().findFirst();
     }
 
     public List<Seat> findSeats(String assignedSeat) {

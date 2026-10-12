@@ -12,7 +12,10 @@ public final class EventModels {
             @NotBlank @Size(min = 3, max = 32) String studentId,
             @NotBlank @Size(min = 2, max = 40) String username) { }
 
-    public record Student(String id, String name) { }
+    public record Student(String id, String name, String netId) { }
+    public record AttendeeUpdateRequest(@jakarta.validation.constraints.NotNull @jakarta.validation.constraints.Min(0) @jakarta.validation.constraints.Max(10) Integer accompanyingMembers) { }
+    public record AttendeeDetails(int accompanyingMembers, int totalAttendees, String registrationCounter) { }
+    public record RegistrationCounter(String number, String floor, String zone) { }
     public record SeatAssignment(String row, int number, String code) { }
     public record FoodCounter(String number, String floor, String zone, String nearGate) { }
 
@@ -24,7 +27,8 @@ public final class EventModels {
             String level,
             String entryGate,
             SeatAssignment seat,
-            FoodCounter foodCounter) { }
+            FoodCounter foodCounter,
+            RegistrationCounter registrationCounter) { }
 
     public record SessionResponse(Student student, EventPass event) { }
 

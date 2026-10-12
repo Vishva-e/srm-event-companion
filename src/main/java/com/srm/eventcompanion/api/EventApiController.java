@@ -10,6 +10,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -64,6 +65,26 @@ public final class EventApiController {
     @GetMapping("/menu")
     public ResponseEntity<MenuResponse> menu(HttpServletRequest request) {
         return noStore(demo.menuFor(requireUser(request)));
+    }
+
+    @GetMapping("/attendees")
+    public ResponseEntity<AttendeeDetails> attendees(HttpServletRequest request) {
+        String studentId = requireUser(request);
+        HttpSession session = request.getSession(false);
+        int count = session.getAttribute("accompanyingMembers") instanceof Integer n ? n : 0;
+        return noStore(new AttendeeDetails(count, count + 1,
+                demo.passFor(studentId).registrationCounter().number()));
+    }
+
+    @PutMapping("/attendees")
+    public ResponseEntity<AttendeeDetails> updateAttendees(
+            @Valid @RequestBody AttendeeUpdateRequest update, HttpServletRequest request) {
+        String studentId = requireUser(request);
+        HttpSession session = request.getSession(false);
+        int count = update.accompanyingMembers();
+        session.setAttribute("accompanyingMembers", count);
+        return noStore(new AttendeeDetails(count, count + 1,
+                demo.passFor(studentId).registrationCounter().number()));
     }
 
     private String requireUser(HttpServletRequest request) {
