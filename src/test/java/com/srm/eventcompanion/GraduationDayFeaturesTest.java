@@ -56,7 +56,7 @@ class GraduationDayFeaturesTest {
     }
 
     @Test void campusGuideAndDietFiltersExist() throws Exception {
-        mvc.perform(get("/")).andExpect(status().isOk())
+        mvc.perform(get("/index.html")).andExpect(status().isOk())
                 .andExpect(content().string(org.hamcrest.Matchers.containsString("view-campus")))
                 .andExpect(content().string(org.hamcrest.Matchers.containsString("data-filter=\"nonveg\"")));
     }
