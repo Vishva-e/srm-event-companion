@@ -59,13 +59,13 @@ class GraduationDayFeaturesTest {
         mvc.perform(get("/api/documents")).andExpect(status().isUnauthorized());
         MockHttpSession session = signIn("SRM2026001");
         mvc.perform(post("/api/documents").session(session).contentType(MediaType.APPLICATION_JSON)
-                .content("{\\"type\\":\\"GRADUATION_CERTIFICATE\\"}"))
+                .content("{\"type\":\"GRADUATION_CERTIFICATE\"}"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.status").value("DEMO_SAVED"));
         mvc.perform(get("/api/documents").session(session))
                 .andExpect(jsonPath("$.type").value("GRADUATION_CERTIFICATE"));
         mvc.perform(post("/api/documents").session(session).contentType(MediaType.APPLICATION_JSON)
-                .content("{\\"type\\":\\"INVALID\\"}"))
+                .content("{\"type\":\"INVALID\"}"))
                 .andExpect(status().isBadRequest());
     }
 
