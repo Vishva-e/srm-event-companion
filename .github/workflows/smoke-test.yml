@@ -49,6 +49,8 @@ jobs:
           grep -q 'SRM Event Companion' /tmp/srm-homepage.html
           curl -fsS http://127.0.0.1:8080/index.html -o /tmp/srm-index.html
           grep -q 'login-screen' /tmp/srm-index.html
+          grep -q 'seating-plan-map' /tmp/srm-index.html
+          grep -q 'seat-zoom-in' /tmp/srm-index.html
           curl -fsS http://127.0.0.1:8080/styles.css -o /tmp/srm-style.css
           curl -fsS http://127.0.0.1:8080/app.js -o /tmp/srm-app.js
           test -s /tmp/srm-style.css

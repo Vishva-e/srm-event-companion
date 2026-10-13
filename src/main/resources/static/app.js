@@ -88,8 +88,8 @@ function applyProfile({ student, event }) {
   setText('.quick-card[data-go="food"] .quick-copy small', `Counter ${counter.number} · ${counter.floor}`);
 
   setText('#view-seat .page-heading .section-kicker', `BLOCK ${event.block} • LEVEL ${event.level}`);
-  setText('.theatre-hint', 'Front view · Assigned seating');
-  setText('.theatre-head h2', `Block ${event.block} Seating`);
+  setText('.theatre-hint', 'Front of auditorium · Stage-facing rows');
+  setText('.theatre-head h2', 'Auditorium seating');
   setText('.theatre-kicker', event.venue.toUpperCase());
   setText('.level-badge', `LEVEL ${event.level}`);
   setText('.seat-badge', seat.code);
@@ -97,11 +97,11 @@ function applyProfile({ student, event }) {
   setText('.assigned-details div:nth-child(1) strong', event.block);
   setText('.assigned-details div:nth-child(2) strong', seat.row);
   setText('.assigned-details div:nth-child(3) strong', event.level);
-  setText('.directions-card li:nth-child(1) b', 'Reach the auditorium');
-  setText('.directions-card li:nth-child(1) span', `Proceed to ${event.venue}, Level ${event.level}.`);
+  setText('.directions-card li:nth-child(1) b', 'Find the auditorium');
+  setText('.directions-card li:nth-child(1) span', `Open the location reference to find ${event.venue}; verify your event entrance.`);
   setText('.directions-card li:nth-child(2) b', `Find Row ${seat.row}`);
   setText('.directions-card li:nth-child(3) b', `Look for Seat ${String(seat.number).padStart(2, '0')}`);
-  setText('#seat-notice', `Your assigned seat is ${seatLabel}. Other seats are shown for reference only.`);
+  setText('#seat-notice', `Your assigned demo seat is ${seatLabel}. All other unverified seats are visual placeholders.`);
 
   setText('.counter-display > b', counter.number);
   setText('.counter-display h2', `Registration Counter ${counter.number}`);
@@ -191,49 +191,72 @@ function goTo(page) {
   renderRoute(route, true);
 }
 
+// Architectural rendering only: the photograph/reference is not a verified
+// seat inventory. The A-G / 01-09 fixtures are the only backed demo records.
+// Unknown schematic positions must not look like bookable/open seats.
+const SEATING_ROWS = [...'ABCDEFGHIJKLMNOPQRSTUVWXYZ', ...[...'ABCDEFGHIJKLMNOPQRSTUVWXYZ'].map(letter => letter + letter)];
+const SEAT_COLUMNS = 57;
+const seatScale = {value: 14, min: 11, max: 22};
+function updateSeatZoom() {
+  $('#seating-plan-map').style.setProperty('--seat-width', seatScale.value + 'px');
+  setText('#seat-zoom-label', Math.round(seatScale.value / 14 * 100) + '%');
+  $('#seat-zoom-out').disabled = seatScale.value <= seatScale.min;
+  $('#seat-zoom-in').disabled = seatScale.value >= seatScale.max;
+}
 function renderSeats(map) {
   const container = $('#seat-rows');
   container.replaceChildren();
-  container.setAttribute('aria-label', `Seating rows ${map.rows.join(', ')}`);
+  container.setAttribute('aria-label', 'Illustrative seats from rows A to ZZ, 57 columns. Demo fixtures limited to rows A-G, seats 01-09.');
+  const known = new Map(map.seats.map(seat => [seat.code, seat]));
   const assigned = currentPass.seat.code;
-  for (const row of map.rows) {
-    const rowNode = document.createElement('div');
-    rowNode.className = 'seat-row';
-    rowNode.setAttribute('role', 'group');
-    rowNode.setAttribute('aria-label', `Row ${row}`);
+  const fragments = document.createDocumentFragment();
+  for (const row of SEATING_ROWS) {
+    const line = document.createElement('div');
+    line.className = 'seating-plan-row';
+    line.setAttribute('role', 'group');
+    line.setAttribute('aria-label', 'Illustrative row ' + row);
     const label = document.createElement('span');
-    label.className = `row-label${row === currentPass.seat.row ? ' is-yours' : ''}`;
+    label.className = 'seating-plan-row-label' + (row === currentPass.seat.row ? ' highlighted-row-label' : '');
     label.textContent = row;
-    rowNode.appendChild(label);
-
-    for (const seat of map.seats.filter(seat => seat.row === row)) {
-      if (seat.number === 6) {
-        const aisle = document.createElement('span');
-        aisle.className = 'aisle';
-        aisle.setAttribute('aria-hidden', 'true');
-        rowNode.appendChild(aisle);
+    line.appendChild(label);
+    for (let n = 1; n <= SEAT_COLUMNS; n++) {
+      // Row-edge irregularity echoes the reference screenshot; not authoritative.
+      const trim = (row.charCodeAt(row.length - 1) * 13 + row.length * 11) % 7;
+      if (n > SEAT_COLUMNS - trim && row !== currentPass.seat.row) continue;
+      const code = row + String(n).padStart(2, '0');
+      const knownSeat = known.get(code);
+      const mine = knownSeat?.status === 'YOURS' && code === assigned;
+      const taken = knownSeat?.status === 'OCCUPIED';
+      const zone = n <= 16 ? 'west' : n <= 42 ? 'center' : 'east';
+      const el = document.createElement(mine || knownSeat ? 'button' : 'span');
+      if (el.tagName === 'BUTTON') el.type = 'button';
+      el.className = 'auditorium-seat zone-' + zone + (mine ? ' my-auditorium-seat' : taken ? ' sample-taken-seat' : '');
+      el.textContent = String(n).padStart(2, '0');
+      if (mine) {
+        el.dataset.seat = code;
+        el.title = 'Your assigned demo seat: ' + code;
+        el.setAttribute('aria-label', 'Your assigned demo seat, row ' + row + ', seat ' + n);
+        el.setAttribute('aria-current', 'location');
+        el.addEventListener('click', () => setText('#seat-notice', 'This is your gold-highlighted assigned demo seat: ' + code + '.'));
+      } else if (knownSeat) {
+        el.disabled = true;
+        el.title = code + ': ' + (taken ? 'occupied in the sample database' : 'unassigned demo seat');
+        el.setAttribute('aria-label', el.title);
+      } else {
+        el.setAttribute('aria-hidden', 'true');
+        el.title = 'Illustrative zone marker (not a registered seat)';
       }
-      const mine = seat.status === 'YOURS';
-      const taken = seat.status === 'OCCUPIED';
-      const button = document.createElement('button');
-      button.type = 'button';
-      button.className = `seat ${mine ? 'seat-assigned' : taken ? 'seat-occupied' : 'seat-free'}`;
-      button.textContent = String(seat.number).padStart(2, '0');
-      button.dataset.seat = seat.code;
-      button.title = `Row ${row}, Seat ${String(seat.number).padStart(2, '0')} — ${mine ? 'your assigned seat' : taken ? 'occupied' : 'available (not assigned)'}`;
-      button.setAttribute('aria-label', button.title);
-      if (mine) button.setAttribute('aria-current', 'location');
-      if (taken) button.disabled = true;
-      if (!taken) button.addEventListener('click', () => {
-        $('#seat-notice').textContent = mine
-          ? `You found it! Your seat is ${seat.code}. Enter via Gate ${currentPass.entryGate}.`
-          : `Seat ${seat.code} is reference-only. Your assigned seat remains ${assigned}.`;
-      });
-      rowNode.appendChild(button);
+      line.appendChild(el);
     }
-    container.appendChild(rowNode);
+    fragments.appendChild(line);
   }
+  container.appendChild(fragments);
+  seatScale.value = 14;
+  updateSeatZoom();
 }
+$('#seat-zoom-out').addEventListener('click', () => {seatScale.value = Math.max(seatScale.min, seatScale.value - 1); updateSeatZoom();});
+$('#seat-zoom-in').addEventListener('click', () => {seatScale.value = Math.min(seatScale.max, seatScale.value + 1); updateSeatZoom();});
+$('#seat-zoom-reset').addEventListener('click', () => {seatScale.value = 14; updateSeatZoom(); $('#seat-pan').scrollTo({top:0,left:0,behavior:'smooth'});});
 
 const illustration = { veg: '✺', nonveg: '✹', snack: '◒', drink: '◉' };
 function make(tag, className, content) {
@@ -349,7 +372,10 @@ $('#locate-seat').addEventListener('click', () => {
   selected.classList.add('seat-pulse');
   selected.focus({ preventScroll: true });
   const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-  selected.scrollIntoView({ behavior: reducedMotion ? 'instant' : 'smooth', block: 'center', inline: 'center' });
+  const pan = $('#seat-pan');
+  const targetLeft = selected.offsetLeft - pan.clientWidth / 2;
+  const targetTop = selected.offsetTop - pan.clientHeight / 2;
+  pan.scrollTo({ left: Math.max(0, targetLeft), top: Math.max(0, targetTop), behavior: reducedMotion ? 'instant' : 'smooth' });
   $('#seat-notice').textContent = `You found it! The gold seat is yours: ${code}.`;
 });
 

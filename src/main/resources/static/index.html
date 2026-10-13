@@ -112,20 +112,52 @@
           <div class="graduation-shortcuts"><button class="grad-shortcut" id="open-student-profile" type="button">👤 Student details &amp; family count ↗</button><button class="grad-shortcut" type="button" data-go="campus">📍 Campus directions ↗</button></div><p class="grad-attendees" id="attendee-summary" role="status">Accompanying members: 0 · Total: 1</p><div class="grad-document-card"><div><strong>📑 Document-ready request</strong><p>Save a sample document requirement for event coordination. This does not submit to the university.</p></div><form id="document-form"><label for="document-type">Document</label><select id="document-type" required><option value="EVENT_PASS">Event pass</option><option value="GRADUATION_CERTIFICATE">Graduation certificate</option><option value="OTHER">Other document</option></select><button type="submit">Save demo request</button></form><p id="document-status" role="status" aria-live="polite"></p></div><div class="tip-banner"><span class="tip-icon" aria-hidden="true">✧</span><div><strong>Helpful tip</strong><p>Check your seat number before entering the auditorium and keep your food counter number handy.</p></div></div>
         </section>
 
-        <section id="view-seat" class="view" aria-labelledby="seat-heading" hidden>
-          <div class="page-heading"><div><span class="section-kicker">BLOCK A • LEVEL 01</span><h1 id="seat-heading" tabindex="-1">Find your seat</h1><p>Locate your assigned seat with a cinema-style auditorium view.</p></div><span class="page-heading-label"><span aria-hidden="true">●</span> Seating guide</span></div>
+        <section id="view-seat" class="view srm-seating-experience" aria-labelledby="seat-heading" hidden>
+          <div class="seating-page-header">
+            <div><span class="section-kicker">SRM ONLINE EDUCATION · KTR CAMPUS</span><h1 id="seat-heading" tabindex="-1">Auditorium Seating Plan</h1><p>Graduation Day · Dr. T. P. Ganesan Auditorium</p></div>
+            <a class="auditorium-location-link" href="https://maps.app.goo.gl/oLcbroDsNHGUFbi67?g_st=ic" target="_blank" rel="noopener noreferrer" aria-label="Open supplied auditorium location in Google Maps">⌖ &nbsp; Open auditorium location ↗</a>
+          </div>
+          <div class="seat-plan-disclaimer"><strong>Illustrative layout:</strong> This A–ZZ visualization is inspired by the supplied seating reference, <em>not</em> a verified SRMIST floor plan. Only seats A01–G09 have sample database statuses. All other seats show layout zones only, not live reservations or availability.</div>
           <div class="seat-layout">
-            <article class="theatre-panel" aria-label="Auditorium seating map">
-              <div class="theatre-head"><div><span class="theatre-kicker">MAIN AUDITORIUM</span><h2>Block A Seating</h2></div><span class="level-badge">LEVEL 01</span></div>
-              <div class="theatre-hint">Front view · Assigned seating</div>
-              <div class="theatre-map"><div class="screen-arc" aria-hidden="true"></div><div class="theatre-screen" aria-hidden="true"></div><div class="stage-light" aria-hidden="true"></div><div class="seat-rows" id="seat-rows" role="group" aria-label="Seating rows A through G"></div><div class="theatre-legend"><span><i class="seat-legend seat-available"></i> Available</span><span><i class="seat-legend seat-taken"></i> Occupied</span><span><i class="seat-legend seat-yours"></i> Your seat</span></div></div>
-              <div class="theatre-footnote"><span>ILLUSTRATIVE SEAT MAP</span><span>Front of auditorium ↑</span></div>
+            <article class="theatre-panel" aria-label="Illustrative auditorium seating visualization">
+              <div class="theatre-head">
+                <div><span class="theatre-kicker">SRM GRADUATION DAY · BIRD'S-EYE VIEW</span><h2>Auditorium seating</h2></div>
+                <span class="level-badge">FRONT → REAR</span>
+              </div>
+              <div class="seat-map-controls" role="group" aria-label="Seating map zoom">
+                <div class="seat-map-scale-label">Zoom &amp; explore · swipe or scroll to pan</div>
+                <button type="button" id="seat-zoom-out" aria-label="Zoom seating map out">−</button>
+                <output id="seat-zoom-label" aria-live="polite" aria-label="Seat map zoom level">100%</output>
+                <button type="button" id="seat-zoom-in" aria-label="Zoom seating map in">+</button>
+                <button type="button" id="seat-zoom-reset">Reset</button>
+              </div>
+              <div class="seat-pan" id="seat-pan" tabindex="0" aria-label="Scroll to explore the auditorium seating illustration">
+                <div class="seating-plan-map" id="seating-plan-map">
+                  <div class="seating-stage">STAGE / SCREEN</div>
+                  <div class="theatre-hint">Front of auditorium · Stage-facing rows</div>
+                  <div class="seat-rows" id="seat-rows" role="group" aria-label="Illustrative seating rows A to ZZ"></div>
+                  <div class="seating-rear">REAR / ENTRANCE SIDE</div>
+                </div>
+              </div>
+              <div class="theatre-legend" aria-label="Seating color legend">
+                <span><i class="seat-legend seat-zone-west"></i> Left zone</span>
+                <span><i class="seat-legend seat-zone-center"></i> Centre zone</span>
+                <span><i class="seat-legend seat-zone-east"></i> Right zone</span>
+                <span><i class="seat-legend seat-taken"></i> Sample occupied</span>
+                <span><i class="seat-legend seat-yours"></i> Your seat</span>
+              </div>
+              <div class="theatre-footnote"><span>DESIGN REFERENCE ONLY · NOT A LIVE FLOOR PLAN</span><span>Zoom or pan to explore</span></div>
             </article>
-            <div class="seat-details">
-              <article class="your-seat-card"><span class="section-kicker">YOUR ASSIGNED SEAT</span><div class="your-seat-number"><div class="seat-badge">E07</div><div><h2>Row E · Seat 07</h2><p><span class="gold-dot"></span> Highlighted on the map</p></div></div><div class="assigned-details"><div><span>BLOCK</span><strong>A</strong></div><div><span>ROW</span><strong>E</strong></div><div><span>LEVEL</span><strong>01</strong></div></div><button class="primary-btn locate-btn" type="button" id="locate-seat">Locate my seat <span aria-hidden="true">↗</span></button></article>
-              <article class="directions-card card"><h3><span aria-hidden="true">↗</span> How to reach your seat</h3><ol><li><b>Reach the auditorium</b><span>Follow the campus guide to Dr. T. P. Ganesan Auditorium.</span></li><li><b>Find Row E</b><span>Follow the row labels beside the seats.</span></li><li><b>Look for Seat 07</b><span>It's highlighted in gold on the map.</span></li></ol></article>
-              <p id="seat-notice" class="seat-notice" role="status" aria-live="polite">Your assigned seat is Row E, Seat 07. Other seats are shown for reference only.</p>
-            </div>
+            <aside class="seat-details" aria-label="Your graduation seating details">
+              <article class="your-seat-card">
+                <span class="section-kicker">YOUR ASSIGNED DEMO SEAT</span>
+                <div class="your-seat-number"><div class="seat-badge">E07</div><div><h2>Row E · Seat 07</h2><p><span class="gold-dot"></span> Gold-highlighted in seat plan</p></div></div>
+                <div class="assigned-details"><div><span>BLOCK</span><strong>A</strong></div><div><span>ROW</span><strong>E</strong></div><div><span>LEVEL</span><strong>01</strong></div></div>
+                <button class="primary-btn locate-btn" type="button" id="locate-seat">Locate my seat <span aria-hidden="true">↗</span></button>
+              </article>
+              <article class="directions-card card"><h3><span aria-hidden="true">↗</span> Seating instructions</h3><ol><li><b>Find the auditorium</b><span>Open the location reference above; verify your event entrance with organizers.</span></li><li><b>Find your row</b><span>Row E will be highlighted in the illustrative seat chart.</span></li><li><b>Locate your seat</b><span>Look for the glowing gold seat. Only your demo assignment is verified here.</span></li></ol></article>
+              <p id="seat-notice" class="seat-notice" role="status" aria-live="polite">Your assigned demo seat is E07. The other rows are schematic only.</p>
+            </aside>
           </div>
         </section>
 

@@ -269,3 +269,55 @@ svg{display:block}
 .mobile-brand .srm-online-logo{display:block;width:min(214px,51vw);height:auto;object-fit:contain}
 .ticket-head .srm-online-logo{display:block;width:min(195px,50%);height:auto;object-fit:contain}
 @media(max-width:520px){.login-brand .srm-online-logo{width:min(100%,320px)}.mobile-brand .srm-online-logo{width:min(175px,50vw)}.ticket-head .srm-online-logo{width:min(155px,49%)}}
+
+/* SRM Auditorium — reference-inspired interactive schematic.
+   The 52x57 aesthetic matrix MUST NOT be construed as real seating inventory. */
+.srm-seating-experience{color:#16345c}
+.srm-seating-experience .seating-page-header{display:flex;align-items:center;justify-content:space-between;gap:22px;margin-bottom:16px}
+.seating-page-header h1{font-family:Georgia,'Times New Roman',serif;font-weight:700;font-size:clamp(25px,2.6vw,38px);margin:6px 0 4px;letter-spacing:-.03em;color:#082a61}
+.seating-page-header p{font-size:13px;color:#607899;margin:0}
+.auditorium-location-link{display:inline-flex;align-items:center;text-decoration:none;white-space:nowrap;gap:5px;background:#0e397d;color:white;border:1px solid #275393;border-radius:12px;font-size:12px;font-weight:700;padding:13px 16px}
+.auditorium-location-link:hover{background:#1b4c99}
+.seat-plan-disclaimer{background:#fff8e9;color:#775b26;border:1px solid #ead7af;border-radius:10px;padding:12px 16px;font-size:11px;line-height:1.6;margin-bottom:22px}
+.srm-seating-experience .seat-layout{grid-template-columns:minmax(0,1fr) 259px;gap:15px}
+.srm-seating-experience .theatre-panel{min-width:0;background:radial-gradient(ellipse at 50% -5%,#173b70,transparent 52%),linear-gradient(135deg,#08142a,#071b37);border:1px solid #1b3766;padding:24px 16px 21px;box-shadow:0 21px 53px #061e4024}
+.srm-seating-experience .theatre-head h2{font-family:Georgia,serif;font-size:24px}
+.srm-seating-experience .theatre-kicker{letter-spacing:.16em;color:#ecc476}
+.seat-map-controls{display:flex;align-items:center;justify-content:flex-end;gap:7px;margin:14px 0 12px}
+.seat-map-scale-label{font-size:10px;color:#a8bad5;margin-right:auto}
+.seat-map-controls button{background:#112c50;border:1px solid #34557f;border-radius:8px;color:white;min-width:29px;min-height:27px;cursor:pointer;font-size:13px;font-weight:800}
+.seat-map-controls button:disabled{opacity:.35;cursor:not-allowed}
+.seat-map-controls #seat-zoom-reset{font-size:10px;padding:4px 10px}
+#seat-zoom-label{min-width:40px;text-align:center;font-size:10px;color:#e6c98b;font-weight:800}
+.seat-pan{width:100%;max-height:830px;overflow:auto;overscroll-behavior:contain;scrollbar-width:thin;scrollbar-color:#385e91 #0b203b;border:1px solid #18385c;border-radius:13px;background:#061427;outline-offset:2px}
+.seating-plan-map{--seat-width:14px;--seat-gap:2px;width:max-content;min-width:100%;padding:21px 18px 25px}
+.seating-stage{width:calc((var(--seat-width) + var(--seat-gap))*53);max-width:96%;height:34px;display:grid;place-items:center;margin:0 auto;background:linear-gradient(90deg,#cab08b,#f8d8a3,#c49c65);color:#183056;border-radius:10px 10px 20px 20px;box-shadow:0 8px 23px #deb36e47;font-family:Georgia,serif;font-weight:800;font-size:12px;letter-spacing:.26em}
+.srm-seating-experience .theatre-hint{text-align:center;margin:10px 0 16px;font-size:9px;letter-spacing:.13em;color:#9db4d5}
+.srm-seating-experience .seat-rows{display:flex;flex-direction:column;gap:3px;min-width:max-content}
+.seating-plan-row{display:flex;align-items:center;gap:var(--seat-gap);min-height:var(--seat-width);width:max-content}
+.seating-plan-row-label{width:24px;flex:none;font-size:9px;color:#a4bedf;text-align:center;font-weight:700}
+.highlighted-row-label{color:#ffd26e;font-weight:900}
+.auditorium-seat{display:grid;place-items:center;flex:none;width:var(--seat-width);height:var(--seat-width);font-family:Arial,sans-serif;font-size:calc(var(--seat-width)*.37);line-height:1;font-weight:700;border:0;border-radius:3px;color:#052343;background:#36bcb3;padding:0;position:relative}
+.auditorium-seat.zone-west{background:linear-gradient(135deg,#4ad5c8,#159eaa)}
+.auditorium-seat.zone-center{background:linear-gradient(135deg,#70a8fa,#3678d6)}
+.auditorium-seat.zone-east{background:linear-gradient(135deg,#cba3fc,#9368e1)}
+.auditorium-seat.sample-taken-seat{background:#415674;color:#c8d4e5;opacity:.75}
+.auditorium-seat.my-auditorium-seat{z-index:1;background:linear-gradient(130deg,#fff2b2,#f7b72f);color:#4e3500;outline:2px solid #fff2bd;box-shadow:0 0 5px #fff1a7,0 0 17px #ffcf55,0 0 32px #f9b844;cursor:pointer}
+.auditorium-seat.my-auditorium-seat:focus-visible{outline:3px solid white;outline-offset:3px}
+.seating-rear{font-size:10px;text-align:center;color:#b1c1da;letter-spacing:.1em;margin-top:21px}
+.srm-seating-experience .theatre-legend{margin-top:19px;gap:13px;justify-content:flex-start}
+.srm-seating-experience .seat-legend{width:12px;height:12px;border-radius:3px}
+.seat-zone-west{background:#2fc1b3}.seat-zone-center{background:#538fee}.seat-zone-east{background:#aa80ea}
+.srm-seating-experience .seat-taken{background:#415674}.srm-seating-experience .seat-yours{background:#f7c047;box-shadow:0 0 8px #ffc64c}
+.srm-seating-experience .theatre-footnote{margin-top:15px;flex-wrap:wrap}
+.srm-seating-experience .your-seat-card,.srm-seating-experience .directions-card{padding:21px}
+.srm-seating-experience .your-seat-number{gap:9px;flex-wrap:wrap}
+.srm-seating-experience .seat-badge{width:73px;height:68px;font-size:23px}
+.srm-seating-experience .your-seat-number h2{font-size:15px}
+.srm-seating-experience .assigned-details>div{padding:12px 5px}
+.srm-seating-experience .directions-card li{font-size:11px}
+.srm-seating-experience .seat-details{gap:12px}
+.srm-seating-experience .locate-btn{width:100%}
+@media(max-width:1080px){.srm-seating-experience .seat-layout{grid-template-columns:minmax(0,1fr)}.srm-seating-experience .seat-details{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr)}.srm-seating-experience .seat-notice{grid-column:1/-1}}
+@media(max-width:700px){.srm-seating-experience .seating-page-header{align-items:flex-start;flex-direction:column;gap:12px}.auditorium-location-link{white-space:normal}.srm-seating-experience .theatre-panel{padding:17px 12px}.srm-seating-experience .seat-details{grid-template-columns:1fr}.seat-map-controls{gap:5px}.seat-map-scale-label{font-size:9px;max-width:120px}.seat-pan{max-height:590px}.seating-plan-map{padding:16px 11px 20px}}
+@media(prefers-reduced-motion:reduce){.auditorium-seat.my-auditorium-seat,.seat-pulse{animation:none!important}}

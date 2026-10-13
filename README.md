@@ -247,3 +247,9 @@ If the public URL isn't configured, both API endpoints return 503 `PUBLIC_URL_NO
 ## Updated SRM Online Education branding
 
 The supplied SRM Online Education (KTR – Chennai) horizontal logo is stored as `src/main/resources/static/assets/srm-online-logo.png` and used in the sign-in hero, sidebar, mobile header, digital pass, and public QR page. It is a user-provided transparent PNG; avoid recreating the seal as text. The older SRM-inspired graphic remains an unused legacy asset. The prototype is not an official SRM authentication service; university branding/public use still requires appropriate organizer permission.
+
+## Auditorium seating plan update (reference-inspired)
+
+The Graduation Day **My Seat** page now uses an interactive bird's-eye-view 52-row (`A-Z`, `AA-ZZ`) teal/blue/purple auditorium **schematic**, a gold highlighted assigned demo seat, a stage/screen label, horizontal/vertical panning, zoom in/out/reset buttons, and a details panel. The supplied [auditorium Google Maps location reference](https://maps.app.goo.gl/oLcbroDsNHGUFbi67?g_st=ic) is linked from this screen. This map link was user-supplied and has not been independently verified for venue identity.
+
+**Critical accuracy limit:** The uploaded seating photo is design inspiration, not a verified seat registry. The existing backend's 7x9 demo seats (`A01-G09`) remain the *only* known records and continue to drive user assignment and sample occupancy. The hundreds of extra colored indicators are deliberately non-interactive schematic markers; color indicates illustration zones **only**, not ticket availability or real occupancy. Replace with an approved seating file and real assigned-seat data before publishing to attendees. No bogus map coordinates or reservation availability are inferred.
