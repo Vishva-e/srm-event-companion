@@ -1,0 +1,48 @@
+name: Deploy frontend demo to GitHub Pages
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "src/main/resources/static/**"
+      - ".github/workflows/deploy-frontend-pages.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: github-pages
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Configure GitHub Pages
+        uses: actions/configure-pages@v5
+        with:
+          enablement: true
+
+      - name: Prepare frontend-only site
+        run: |
+          mkdir -p _site
+          cp src/main/resources/static/index.html src/main/resources/static/app.js src/main/resources/static/styles.css _site/
+          cp -R src/main/resources/static/assets _site/assets
+
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: _site
+
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4

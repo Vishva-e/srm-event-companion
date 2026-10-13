@@ -12,7 +12,7 @@
 </head>
 <body>
   <noscript><p class="script-notice">JavaScript is needed to sign in and display your demo event pass. Enable JavaScript and reload this page.</p></noscript>
-  <!-- Independent SRM-inspired student demo. Only sample IDs/usernames are sent to this local Spring Boot server; no real SRM identity service is contacted. -->
+  <!-- Independent frontend-only SRM-inspired demo. All student and event details are illustrative local fixtures. -->
   <div id="login-screen" class="login-screen">
     <div class="login-frame">
       <section class="login-hero" aria-labelledby="intro-heading">
@@ -39,27 +39,21 @@
         <div class="login-panel-top"><span class="status-dot"></span> EVENT COMPANION <span class="login-edition">2026 Edition</span></div>
         <div class="login-form-wrap">
           <div class="welcome-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="m4 12 5 5L20 6"/></svg></div>
-          <span class="section-kicker">STUDENT ACCESS PORTAL</span>
+          <span class="section-kicker">GRADUATION DAY</span>
           <h2 id="login-heading">Welcome to Graduation Day.</h2>
           <p class="form-intro">Enter your student details to view your event pass and assigned locations.</p>
           <form id="login-form" novalidate>
             <div class="field">
-              <label for="student-id">Register number or Net ID (demo)</label>
-              <div class="input-wrap"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M7 9h4M7 13h8M7 17h5M15 9h2"/></svg><input id="student-id" name="studentId" type="text" autocomplete="off" maxlength="32" spellcheck="false" placeholder="SRM2026001 or vishva.demo" aria-describedby="login-error" required /></div>
-            </div>
-            <div class="field">
-              <label for="username">Username</label>
-              <div class="input-wrap"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.5 3.5-7 8-7s8 2.5 8 7"/></svg><input id="username" name="username" type="text" autocomplete="off" maxlength="40" placeholder="Enter your username" aria-describedby="login-error" required /></div>
+              <label for="student-id">Register number or Net ID</label>
+              <div class="input-wrap"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M7 9h4M7 13h8M7 17h5M15 9h2"/></svg><input id="student-id" name="studentId" type="text" autocomplete="username" maxlength="32" spellcheck="false" placeholder="SRM2026001 or vishva.demo" aria-describedby="login-error" required /></div>
             </div>
             <p id="login-error" class="form-error" role="alert" aria-live="polite"></p>
             <p id="login-status" class="form-status" role="status"></p>
             <button class="primary-btn login-submit" type="submit" disabled>Access my event pass <span aria-hidden="true">→</span></button>
           </form>
-          <button id="retry-session" class="link-btn retry-session" type="button" hidden>Retry loading my event pass</button>
-          <div class="demo-access"><span class="demo-access-icon" aria-hidden="true">✦</span><div><strong>Try the interactive demo</strong><p>Use sample details — no real university credentials needed. Other demo users: SRM2026002 / Sanjana and SRM2026003 / Arun.</p><button id="demo-fill" type="button" class="link-btn" disabled>Fill demo details <span aria-hidden="true">↗</span></button></div></div>
+          <div class="demo-access"><span class="demo-access-icon" aria-hidden="true">✦</span><div><strong>Try the interactive demo</strong><p>Use a sample register number or Net ID — no real university credentials needed. Other demo IDs: SRM2026002 and SRM2026003.</p><button id="demo-fill" type="button" class="link-btn" disabled>Fill demo ID <span aria-hidden="true">↗</span></button></div></div>
         </div>
-        <div style="background:#eff5ff;padding:16px;border-radius:14px;margin:16px 0;border:1px solid #d8e4f6;display:flex;gap:12px;align-items:center"><span aria-hidden="true" style="font-size:28px;color:#084298">▦</span><div style="flex:1"><strong style="font-size:13px;color:#143567">QR event access</strong><p style="font-size:11px;line-height:1.5;margin:4px 0;color:#60728d">Share the scan-to-login QR with students.</p></div><a href="/share.html" style="font-size:12px;font-weight:700;color:white;background:#084298;padding:10px 12px;text-decoration:none;border-radius:9px;white-space:nowrap">View QR →</a></div>
-        <div class="login-note"><span aria-hidden="true">ⓘ</span> Unofficial demo. Runs on a demo Java server; it does not connect to SRM authentication or collect passwords.</div>
+        <div class="login-note"><span aria-hidden="true">ⓘ</span> Unofficial frontend-only demo. Uses sample data in your browser; it does not connect to SRM or collect credentials.</div>
       </section>
     </div>
   </div>
@@ -76,6 +70,7 @@
       </nav>
       <div class="sidebar-event">
         <span class="sidebar-event-kicker"><span class="live-dot"></span> EVENT PASS ACTIVE</span>
+        <img class="sidebar-event-logo" src="assets/srm-online-logo.png" alt="SRM Online Education — KTR Chennai" width="174" height="33" />
         <strong>SRM Graduation<br />Day</strong>
         <span id="sidebar-event-location">Main Auditorium<br />Block A · Gate 02</span>
         <div class="sidebar-event-bottom"><span>YOUR SEAT</span><b>E07</b></div>
@@ -101,15 +96,15 @@
             <article class="event-ticket" aria-label="Your digital event pass">
               <div class="ticket-orbit ticket-orbit-one" aria-hidden="true"></div><div class="ticket-orbit ticket-orbit-two" aria-hidden="true"></div>
               <div class="ticket-head"><span class="pass-pill"><span class="status-dot"></span> PASS ACTIVE</span><img class="srm-online-logo" src="assets/srm-online-logo.png" alt="SRM Online Education" width="195" height="37" /></div>
-              <div class="ticket-title"><span>SAMPLE EVENT DETAILS · DEMO</span><h2>SRM GRADUATION DAY</h2><p>Main Auditorium <span>•</span> Block A</p></div>
+              <div class="ticket-title"><span>GRADUATION DAY · EVENT PASS</span><h2>SRM GRADUATION DAY</h2><p>Main Auditorium <span>•</span> Block A</p></div>
               <div class="ticket-dashed"></div>
-              <div class="ticket-stats"><div><span>YOUR SEAT</span><strong>E07</strong></div><div><span>BLOCK</span><strong>A</strong></div><div><span>REGISTRATION</span><strong class="gold-text">03</strong></div></div>
+              <div class="ticket-stats"><div><span>YOUR SEAT</span><strong>E07</strong></div><div><span>REGISTRATION COUNTER</span><strong class="gold-text">03</strong></div></div>
             </article>
             <article class="event-info card"><div class="card-title-row"><h2>Event information</h2><span class="round-icon" aria-hidden="true">✦</span></div><div class="event-info-line"><span class="icon-square" aria-hidden="true">▤</span><div><span>DATE</span><strong id="event-date">08 October 2026</strong></div></div><div class="event-info-line"><span class="icon-square" aria-hidden="true">◷</span><div><span>VENUE</span><strong id="event-venue">Main Auditorium, Block A</strong></div></div><div class="event-info-line"><span class="icon-square" aria-hidden="true">⇥</span><div><span>ENTRY</span><strong id="event-entry">Gate 02 · Level 01</strong></div></div><span class="info-caption">Sample event information for UI demonstration.</span></article>
           </div>
           <div class="section-title-row"><div><span class="section-kicker">EXPLORE</span><h2>Your quick access</h2></div><span class="section-subtitle">Everything is one click away</span></div>
           <div class="quick-grid"><button class="quick-card" type="button" data-go="seat"><span class="quick-icon blue-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 4h14v5H5zM4 11h16v7H4zM7 18v3m10-3v3"/></svg></span><span class="quick-copy"><b>Find your seat</b><small>Row E • Seat 07 • Block A</small><span>View cinema-style map</span></span><span class="quick-arrow" aria-hidden="true">↗</span></button><button class="quick-card" type="button" data-go="food"><span class="quick-icon gold-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 4v7a4 4 0 0 0 8 0V4M8 4v16m8-16c3 0 5 3 5 7v3h-5V4Zm0 10v6"/></svg></span><span class="quick-copy"><b>Registration &amp; food</b><small>Counter 03 • Ground floor</small><span>View registration &amp; menu</span></span><span class="quick-arrow" aria-hidden="true">↗</span></button></div>
-          <div class="graduation-shortcuts"><button class="grad-shortcut" id="open-student-profile" type="button">👤 Student details &amp; family count ↗</button><button class="grad-shortcut" type="button" data-go="campus">📍 Campus directions ↗</button></div><p class="grad-attendees" id="attendee-summary" role="status">Accompanying members: 0 · Total: 1</p><div class="grad-document-card"><div><strong>📑 Document-ready request</strong><p>Save a sample document requirement for event coordination. This does not submit to the university.</p></div><form id="document-form"><label for="document-type">Document</label><select id="document-type" required><option value="EVENT_PASS">Event pass</option><option value="GRADUATION_CERTIFICATE">Graduation certificate</option><option value="OTHER">Other document</option></select><button type="submit">Save demo request</button></form><p id="document-status" role="status" aria-live="polite"></p></div><div class="tip-banner"><span class="tip-icon" aria-hidden="true">✧</span><div><strong>Helpful tip</strong><p>Check your seat number before entering the auditorium and keep your food counter number handy.</p></div></div>
+          <div class="graduation-shortcuts"><button class="grad-shortcut" id="open-student-profile" type="button">👤 Student details &amp; family count ↗</button><button class="grad-shortcut" type="button" data-go="campus">📍 Campus directions ↗</button></div><p class="grad-attendees" id="attendee-summary" role="status">Accompanying members: 0 · Total: 1</p><div class="grad-document-card"><div><strong>📑 Sample Graduation Day event pass</strong><p>Download a printable PDF copy of your sample pass. This is not an official university document.</p><button id="download-sample-pass" type="button">Download PDF</button><p id="sample-pass-status" role="status" aria-live="polite"></p></div></div><div class="tip-banner"><span class="tip-icon" aria-hidden="true">✧</span><div><strong>Helpful tip</strong><p>Check your seat number before entering the auditorium and keep your food counter number handy.</p></div></div>
         </section>
 
         <section id="view-seat" class="view srm-seating-experience" aria-labelledby="seat-heading" hidden>
@@ -173,7 +168,8 @@
         </section>
 <section id="view-campus" class="view" aria-labelledby="campus-heading" hidden>
 <div class="page-heading"><div><span class="section-kicker">KATTANKULATHUR CAMPUS GUIDE</span><h1 id="campus-heading" tabindex="-1">Campus directions</h1><p>Find the auditorium, registration area, Tech Park and visitor facilities.</p></div></div>
-<div class="grad-location-banner"><div><strong>Optional live location</strong><p>With your permission, your browser can provide your starting location to Google Maps when you open directions. Coordinates are not stored by the Java server.</p></div><button id="enable-location" class="primary-btn" type="button">Use my location</button><button id="disable-location" type="button" disabled>Stop</button></div>
+<section class="campus-map-panel" aria-labelledby="campus-map-title"><div class="campus-map-heading"><div><span class="section-kicker">GRADUATION DAY VENUE</span><h2 id="campus-map-title">📍 Dr. T. P. Ganesan Auditorium</h2><p>Auditorium location pinned from the supplied Google Maps location.</p></div><a href="https://www.google.com/maps/search/?api=1&amp;query=R2FW%2BWM3%20Dr.%20T.P%20Ganesan%20Auditorium%2C%20Intra%20College%20Rd%2C%20Potheri%2C%20SRM%20Nagar%2C%20Kattankulathur%2C%20Tamil%20Nadu%20603203" target="_blank" rel="noopener noreferrer">Open pinned location ↗</a></div><iframe class="campus-map-frame" title="Map with a location pin on Dr. T. P. Ganesan Auditorium, SRMIST Kattankulathur" src="https://maps.google.com/maps?q=R2FW%2BWM3%20Dr.%20T.P%20Ganesan%20Auditorium%2C%20Intra%20College%20Rd%2C%20Potheri%2C%20SRM%20Nagar%2C%20Kattankulathur%2C%20Tamil%20Nadu%20603203&amp;z=17&amp;output=embed" loading="lazy" referrerpolicy="no-referrer-when-downgrade" allowfullscreen></iframe><p class="campus-map-note">The pin marks Dr. T. P. Ganesan Auditorium. Confirm the exact event entrance and route with campus staff.</p></section>
+<div class="grad-location-banner"><div><strong>Optional live location</strong><p>With your permission, your browser can provide your starting location to Google Maps when you open directions. Coordinates stay in this browser demo.</p></div><button id="enable-location" class="primary-btn" type="button">Use my location</button><button id="disable-location" type="button" disabled>Stop</button></div>
 <p class="grad-location-status" id="location-status" role="status">Location is off. Map searches still work.</p>
 <div class="grad-places">
 <article><span>🎓 AUDITORIUM</span><h2>Dr. T. P. Ganesan Auditorium</h2><p>Confirmed campus venue name. Exact ceremony seating requires organizer confirmation.</p><a class="grad-map-link" data-place="Dr T P Ganesan Auditorium SRMIST Kattankulathur Tamil Nadu" href="#">Open Maps ↗</a></article>
@@ -188,5 +184,5 @@
     </div>
     <nav class="mobile-nav" aria-label="Mobile navigation"><button class="mobile-nav-item is-active" type="button" data-go="home" aria-current="page"><svg viewBox="0 0 24 24"><path d="m3 10 9-7 9 7v10h-7v-7h-4v7H3z"/></svg><span>Home</span></button><button class="mobile-nav-item" type="button" data-go="seat"><svg viewBox="0 0 24 24"><path d="M5 4h14v5H5zM4 11h16v7H4zM7 18v3m10-3v3"/></svg><span>My seat</span></button><button class="mobile-nav-item" type="button" data-go="food"><svg viewBox="0 0 24 24"><path d="M4 4v7a4 4 0 0 0 8 0V4M8 4v16m8-16c3 0 5 3 5 7v3h-5V4Zm0 10v6"/></svg><span>Register</span></button><button class="mobile-nav-item" type="button" data-go="campus"><span aria-hidden="true">⌖</span><span>Campus</span></button></nav>
   </div>
-<div class="grad-modal" id="student-modal" hidden><section class="grad-modal-panel" role="dialog" aria-modal="true" aria-labelledby="student-modal-title"><button class="grad-modal-x" id="close-student-profile" type="button" aria-label="Close">×</button><span>🎓 GRADUATION DAY</span><h2 id="student-modal-title">Welcome, <span id="student-modal-name">Student</span>!</h2><p>Review your demo registration details. Count accompanying members excluding yourself.</p><div class="grad-profile-grid"><div><small>REGISTER NUMBER</small><strong id="profile-id">—</strong></div><div><small>NET ID (DEMO)</small><strong id="profile-netid">—</strong></div><div><small>YOUR SEAT</small><strong id="profile-seat">—</strong></div><div><small>REGISTRATION COUNTER</small><strong id="profile-counter">—</strong></div></div><form id="attendee-form"><label for="attendee-count">Accompanying members (0–10)</label><input id="attendee-count" type="number" min="0" max="10" value="0" required><p id="attendee-error" role="alert" class="form-error"></p><button class="primary-btn" type="submit">Save and continue →</button></form><p class="grad-modal-note">Demo session count only. Not an official graduation attendance registration.</p></section></div></body>
+<div class="grad-modal" id="student-modal" hidden><section class="grad-modal-panel" role="dialog" aria-modal="true" aria-labelledby="student-modal-title"><button class="grad-modal-x" id="close-student-profile" type="button" aria-label="Close">×</button><span>🎓 GRADUATION DAY</span><h2 id="student-modal-title">Welcome, <span id="student-modal-name">Student</span>!</h2><p>Count accompanying members excluding yourself, then enter each person's name and relationship to you. Mobile number is optional.</p><div class="grad-profile-grid"><div><small>REGISTER NUMBER</small><strong id="profile-id">—</strong></div><div><small>NET ID (DEMO)</small><strong id="profile-netid">—</strong></div><div><small>YOUR SEAT</small><strong id="profile-seat">—</strong></div><div><small>REGISTRATION COUNTER</small><strong id="profile-counter">—</strong></div></div><form id="attendee-form"><label for="attendee-count">Accompanying members (0–10)</label><input id="attendee-count" type="number" min="0" max="10" value="0" required><div id="companion-fields" class="companion-fields" aria-live="polite"></div><p id="attendee-error" role="alert" class="form-error"></p><button class="primary-btn" type="submit">Save and continue →</button></form><p class="grad-modal-note">Demo session only; these details are not submitted to SRM University.</p></section></div></body>
 </html>

@@ -1,18 +1,40 @@
 # SRM Event Companion — Java Spring Boot Website
 
-An **unofficial SRM-inspired student hackathon prototype** recreated from the four-screen Figma concept. The user interface is responsive HTML/CSS/JavaScript; the application backend, session handling, event details, seat map and menu APIs are **Java + Spring Boot 3**.
+An **unofficial SRM-inspired student hackathon prototype** recreated from the four-screen Figma concept. Its interactive frontend demo runs independently with local sample data; an optional Java + Spring Boot 3 backend and H2 database are also included.
 
 > **Important:** This is **not** an official SRM University portal. The university-inspired vector emblem is original placeholder artwork, **not** the official SRM logo. Student names, IDs, attendance, seat numbers and menus are fictitious demo data. **Never enter real SRM credentials.** This sample has *no* production authentication or integration with SRM services.
 
 ## 📦 Tech stack
 
-- **Backend:** Java 17+, Spring Boot 3.5.6, Spring Web MVC, Spring JDBC, Jakarta Bean Validation, HTTP session
-- **Frontend:** Semantic HTML5, responsive CSS3, vanilla JavaScript (`fetch`, DOM rendering). No Node/npm required.
-- **Data:** Embedded, file-backed H2 database for demo students, seats, food counters and menus
+- **Frontend demo:** Semantic HTML5, responsive CSS3, vanilla JavaScript and in-browser sample fixtures. No backend, Node or npm required.
+- **Optional backend:** Java 17+, Spring Boot 3.5.6, Spring Web MVC, Spring JDBC, Jakarta Bean Validation, HTTP session
+- **Optional database:** Embedded, file-backed H2 database for demo students, seats, food counters and menus
 - **Testing:** JUnit 5 + Spring `MockMvc` integration tests with an isolated in-memory H2 database
 - **Branding:** University-inspired blue `#084298` and heritage gold `#E1B052` from the concept design
 
-## ▶️ Run locally
+## 🎨 Run the frontend-only demo
+
+Open `src/main/resources/static/index.html` with VS Code Live Server or any static file server. The login, event pass, auditorium map, food menu, guest count, printable pass and campus guide run with sample data in the browser; no Java server or API is needed.
+
+Demo logins:
+
+| Register number | Net ID | Demo student |
+|---|---|---|
+| `SRM2026001` | `vishva.demo` | Vishva |
+| `SRM2026002` | `sanjana.demo` | Sanjana |
+| `SRM2026003` | `arun.demo` | Arun |
+
+Guest-count changes are kept in the current browser tab only. Never enter real student credentials.
+
+### Share the demo on WhatsApp
+
+The repository includes a GitHub Pages workflow that publishes only the frontend demo (not the API-dependent share poster page). Push the changes to the `main` branch, then open the repository's **Actions** tab and wait for **Deploy frontend demo to GitHub Pages** to finish. The public demo URL is:
+
+<https://vishva-e.github.io/srm-event-companion/>
+
+Send that URL in WhatsApp. The page is public, so anyone with the link can open the sample demo. If GitHub Pages is not enabled for the repository, open **Settings → Pages**, choose **GitHub Actions** as the build and deployment source, then run the workflow again.
+
+## ▶️ Run the optional Java backend
 
 **Prerequisites:** JDK 17 or newer and Apache Maven 3.9+ (or open `pom.xml` in IntelliJ IDEA and run `EventCompanionApplication`).
 
@@ -22,7 +44,7 @@ cd srm-event-companion
 mvn spring-boot:run
 ```
 
-Open **http://localhost:8080** in your browser. This single Java service hosts the website *and* its API — there is no separate frontend server.
+Open **http://localhost:8080** in your browser to use the optional Spring Boot-hosted site and API.
 
 API integration tests:
 
@@ -69,7 +91,7 @@ The named Docker volume retains the H2 database when the container is replaced.
 
 ## 🛠 Troubleshooting: index.html does not load
 
-**Use the Spring Boot server, not VS Code Live Server**. Open the terminal in the directory containing `pom.xml`:
+For the frontend-only demo, use VS Code Live Server or another static file server with `src/main/resources/static/index.html`. To run the optional API backend, open the terminal in the directory containing `pom.xml`:
 
 ```bash
 git clone https://github.com/Vishva-e/srm-event-companion.git
@@ -89,7 +111,7 @@ Wait for `Started EventCompanionApplication` in the terminal and open
 - **404 Not Found**: Confirm you started the Java application from the repository root. The HTML is at `src/main/resources/static/index.html`, and Spring Boot serves it at the root path `/`.
 - **Blank UI / assets missing**: Open browser Developer Tools (F12) → Console and Network. Confirm `/app.js`, `/styles.css`, and `/assets/srm-online-logo.png` return HTTP 200. Run `mvn clean spring-boot:run`, then reload with Ctrl+Shift+R.
 - **Java build errors**: Run `mvn clean test` and inspect the **first** error. The first build requires internet access to download dependencies.
-- **Do not open `index.html` via `file://`**: Login and seat/menu features require `/api/` endpoints on the Spring Boot server.
+- The frontend-only demo does not call `/api/` endpoints. Use the Spring Boot server only when you specifically want to run the optional backend features.
 
 You can verify the server from a second terminal:
 
@@ -100,26 +122,34 @@ curl -I http://localhost:8080/styles.css
 curl -I http://localhost:8080/app.js
 ```
 
-When all four return HTTP 200, try the demo account: `SRM2026001` / `Vishva`.
+When all four return HTTP 200, try the demo ID: `SRM2026001`.
+
+### Open the standalone demo
+
+[`graduation-day-standalone.html`](./graduation-day-standalone.html) is the complete single-file app. Open it directly in a browser (`file://`) without starting Spring Boot. Its HTML, CSS, JavaScript, sample data, offline QR generator, and poster are all embedded in that file.
+
+The demo login, pass, seat map, sample food menu, and accompanying-member details work locally; member details are saved only in that browser's local storage. Creating a QR poster also works offline. To make its QR open on another device, enter a public website URL; map links need internet when opened. The separate Spring Boot application remains available at `http://localhost:8080/` when you want server-backed demo data.
 
 ## 🔑 Demo student accounts
 
-Use **only** these fictional identities. Names must match the corresponding sample ID (case-insensitive). The **Fill demo details** button populates the first account.
+Use **only** these fictional register numbers or Net IDs. Names below are displayed in the app and are not requested at sign-in. The **Fill demo ID** button populates the first account.
 
-| Student ID | Username | Assigned seat | Gate | Food counter |
+| Register number | Display name | Net ID | Assigned seat | Gate | Food counter |
 |---|---|---|---|---|
-| `SRM2026001` | `Vishva` | **E07** | 02 | 03 |
-| `SRM2026002` | `Sanjana` | **C04** | 01 | 01 |
-| `SRM2026003` | `Arun` | **F02** | 03 | 02 |
+| `SRM2026001` | `Vishva` | `vishva.demo` | **E07** | 02 | 03 |
+| `SRM2026002` | `Sanjana` | `sanjana.demo` | **C04** | 01 | 01 |
+| `SRM2026003` | `Arun` | `arun.demo` | **F02** | 03 | 02 |
 
 ## ✅ Functional features
 
-1. **Student demo login:** Enter ID and username. Spring Boot validates input and matches it against the fictitious profiles stored in H2.
+1. **Student demo login:** Enter a sample register number or Net ID. Spring Boot matches it against the fictitious profiles stored in H2.
 2. **Session-backed dashboard:** Server responds with personalised event pass, assigned seat and food counter; refresh restores your server session until it expires after 30 minutes of inactivity.
 3. **Cinema-style seating:** Java API serves a 7-row × 9-seat auditorium map. Your seat is **highlighted gold**. Available and occupied seats are visually distinct. **Locate my seat** scrolls/highlights the assigned spot.
 4. **Food counters:** Java API serves the assigned food counter and four menu items with prices in INR. Client-side filters and search work across the API data.
-5. **Responsive layouts:** Desktop side navigation and mobile bottom navigation.
-6. **Log out:** Invalidates the Java HTTP session and returns to sign-in. Protected APIs return 401 without a session.
+5. **Campus guide:** Embedded Kattankulathur campus map, place searches and optional live directions.
+6. **Sample pass download:** Download a personalized PDF copy of the demo event pass. It is clearly marked as not valid for entry.
+7. **Responsive layouts:** Desktop side navigation and mobile bottom navigation.
+8. **Log out:** Invalidates the Java HTTP session and returns to sign-in. Protected APIs return 401 without a session.
 
 ## 🔌 REST API
 
@@ -127,7 +157,7 @@ Responses with a body are JSON; successful sign-out returns `204 No Content`. Se
 
 | HTTP | URL | Function |
 |---|---|---|
-| `POST` | `/api/session` | Demo sign in with `{ "studentId": "SRM2026001", "username": "Vishva" }` |
+| `POST` | `/api/session` | Demo sign in with `{ "studentId": "SRM2026001" }` (register number or Net ID) |
 | `GET` | `/api/session` | Read current session and event pass |
 | `DELETE` | `/api/session` | Sign out |
 | `GET` | `/api/event` | Current user's event/seat/counter assignment |
@@ -138,7 +168,7 @@ Example:
 
 ```bash
 curl -c cookies.txt -H 'Content-Type: application/json' \
-  -d '{"studentId":"SRM2026001","username":"Vishva"}' \
+  -d '{"studentId":"SRM2026001"}' \
   http://localhost:8080/api/session
 
 curl -b cookies.txt http://localhost:8080/api/seats
@@ -196,7 +226,7 @@ srm-event-companion/
 
 ## 🛡️ Before real use
 
-This demo checks *known sample values*, but **ID + username alone are not secure authentication**. A real deployment must have university-approved SSO/OIDC (and permission to use institutional marks), TLS/HTTPS, a persistent user/enrolment database, server-side authorization, CSRF protection, rate limits, audit logging, and verified seat/counter assignments. The demo must never be advertised as an official SRM login site.
+This demo accepts a *known sample register number or Net ID only*; this is not secure authentication. A real deployment must have university-approved SSO/OIDC (and permission to use institutional marks), TLS/HTTPS, a persistent user/enrolment database, server-side authorization, CSRF protection, rate limits, audit logging, and verified seat/counter assignments. The demo must never be advertised as an official SRM login site.
 
 ## Notes
 
@@ -208,17 +238,17 @@ This demo checks *known sample values*, but **ID + username alone are not secure
 ## Troubleshooting
 
 - **The page opens but sign-in does not work:** Start the Spring Boot server and open `http://localhost:8080`; opening `index.html` directly does not provide the API. JavaScript must be enabled.
-- **Demo account not found:** Use a matching ID and username from the table above. Leading/trailing spaces and letter case are ignored.
+- **Demo account not found:** Use a matching register number or Net ID from the table above. Leading/trailing spaces and letter case are ignored.
 - **The server port is already in use:** Stop the other server or run `PORT=8081 mvn spring-boot:run`, then open `http://localhost:8081`.
 - **Maven cannot download dependencies:** Check your internet connection and Maven proxy/repository settings, then retry `mvn clean verify`.
 
 ## 📲 QR entry: scan to open student login
 
-QR codes **open the website login page**, but do not log students in automatically. Never encode student IDs, usernames, passwords, or session tokens. This is an educational SRM-inspired demo only, not an authorised SRM identity service.
+QR codes **open the website login page**, but do not log students in automatically. Never encode student IDs, passwords, or session tokens. This is an educational SRM-inspired demo only, not an authorised SRM identity service.
 
-The default value in `application.properties` is an intentionally non-working sample: `https://srm-event-companion.example/`. The QR endpoints deliberately refuse placeholder/sample and localhost addresses (503), so no invalid QR is shared. Set `APP_PUBLIC_URL` to the real HTTPS deployment URL to enable the QR.
+By default, the app generates a local QR for `http://localhost:8080/` so you can try the feature during development. That QR only opens on the computer running the app; a phone cannot use its own `localhost` to reach your computer.
 
-**Important:** `localhost` and GitHub repository URLs are NOT public website links. Deploy this Spring Boot application to a publicly reachable HTTPS domain, then set its external URL using the `APP_PUBLIC_URL` environment variable. Until then the QR page shows a configuration message rather than a misleading QR.
+To scan from another device, set `APP_PUBLIC_URL` to an address that device can reach. For deployment, use the real public HTTPS domain; never use `localhost` or a GitHub repository URL as the deployed address.
 
 PowerShell:
 
@@ -233,16 +263,16 @@ Linux/macOS:
 APP_PUBLIC_URL="https://your-real-deployed-domain.example/" mvn spring-boot:run
 ```
 
-On hosting, configure `APP_PUBLIC_URL` to the **actual** domain and restart the app. The above domain is only a placeholder.
+On hosting, configure `APP_PUBLIC_URL` to the **actual** domain and restart the app. The above domain is only a placeholder. If the URL is missing or is a placeholder/sample domain, the QR endpoints return 503 `PUBLIC_URL_NOT_CONFIGURED`.
 
-After deployment visit `/share.html` for a branded, print-ready poster with **Download PNG**, **Copy login link**, and **Print poster** controls.
+After deployment visit `/share.html` for a branded, print-ready poster with **Download Full Poster PNG**, **Copy login link**, and **Print poster** controls.
 
 Endpoints:
 - `GET /share.html` — public share/print poster page.
 - `GET /api/share` — configured login URL metadata.
 - `GET /api/share/qr.png` — server-generated 480×480 scannable PNG using ZXing.
 
-If the public URL isn't configured, both API endpoints return 503 `PUBLIC_URL_NOT_CONFIGURED`. The QR image is created locally in Java with no third-party QR web service. Scan-test on a separate phone before distributing.
+If the URL isn't configured or is a placeholder, both API endpoints return 503 `PUBLIC_URL_NOT_CONFIGURED`. The QR image is created locally in Java with no third-party QR web service. Scan-test on a separate phone before distributing.
 
 ## Updated SRM Online Education branding
 
