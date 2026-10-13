@@ -373,8 +373,10 @@ $('#locate-seat').addEventListener('click', () => {
   selected.focus({ preventScroll: true });
   const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   const pan = $('#seat-pan');
-  const targetLeft = selected.offsetLeft - pan.clientWidth / 2;
-  const targetTop = selected.offsetTop - pan.clientHeight / 2;
+  const selectedRect = selected.getBoundingClientRect();
+  const panRect = pan.getBoundingClientRect();
+  const targetLeft = pan.scrollLeft + selectedRect.left - panRect.left - pan.clientWidth / 2 + selectedRect.width / 2;
+  const targetTop = pan.scrollTop + selectedRect.top - panRect.top - pan.clientHeight / 2 + selectedRect.height / 2;
   pan.scrollTo({ left: Math.max(0, targetLeft), top: Math.max(0, targetTop), behavior: reducedMotion ? 'instant' : 'smooth' });
   $('#seat-notice').textContent = `You found it! The gold seat is yours: ${code}.`;
 });
