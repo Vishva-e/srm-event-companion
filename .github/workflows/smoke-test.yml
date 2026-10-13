@@ -2,7 +2,7 @@ name: Verify Spring Boot website
 
 on:
   push:
-    branches: [main, feature/graduation-day-companion]
+    branches: [main, feature/graduation-day-companion, feature/srm-auditorium-seating-design]
   workflow_dispatch:
 
 permissions:
