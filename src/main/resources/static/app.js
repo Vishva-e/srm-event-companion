@@ -39,7 +39,7 @@ function demoProfile(student) {
   return {
     student: { id: student.id, name: student.name, netId: student.netId },
     event: {
-      name: 'SRM Graduation Day',
+      name: 'SRM University Graduation Day',
       date: '08 October 2026',
       venue: 'Main Auditorium',
       block: 'A',
