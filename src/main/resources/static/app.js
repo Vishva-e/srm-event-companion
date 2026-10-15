@@ -580,13 +580,10 @@ function hideStudentModal() {
   $('#attendee-error').textContent = '';
 }
 $('#open-student-profile').addEventListener('click',showStudentModal);
-$('#close-student-profile').addEventListener('click',hideStudentModal);
-$('#student-modal').addEventListener('click',e => {if(e.target === $('#student-modal')) hideStudentModal();});
 $('#attendee-count').addEventListener('input', () => {
   const count = Number($('#attendee-count').value);
   if (Number.isInteger(count) && count >= 0 && count <= 10) renderCompanionFields(count);
 });
-document.addEventListener('keydown',e => {if(e.key==='Escape' && !$('#student-modal').hidden)hideStudentModal();});
 $('#attendee-form').addEventListener('submit', e => {
   e.preventDefault();
   const count=Number($('#attendee-count').value);
