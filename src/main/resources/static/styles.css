@@ -49,7 +49,7 @@ svg{display:block}
 .login-hero-copy>p{max-width:340px;color:#B7CBE6;font-size:14px;line-height:1.9;margin-bottom:25px}
 .hero-highlight{border:1px solid rgba(222,237,255,.15);background:linear-gradient(145deg,rgba(26,73,126,.8),rgba(6,26,57,.75));border-radius:19px;padding:22px 24px 19px;max-width:400px;box-shadow:0 20px 32px rgba(0,0,0,.09)}
 .hero-highlight-top{display:flex;align-items:center;justify-content:space-between;color:#C5D5F3;font-size:10px;font-weight:700;letter-spacing:.14em}
-.graduate-illustration{display:block;width:min(100%,360px);height:190px;margin:5px auto 0;overflow:visible}
+.graduate-illustration{display:block;width:100%;height:auto;aspect-ratio:3/2;object-fit:cover;object-position:center 54%;margin:10px auto 0;border:1px solid rgba(255,255,255,.14);border-radius:12px;box-shadow:0 12px 25px rgba(0,0,0,.2)}
 .hero-spark{font-size:17px;color:var(--gold)}
 .hero-highlight-middle{display:flex;flex-direction:column;align-items:center;gap:5px;margin:23px auto 18px}
 .hero-highlight-middle span{height:3px;border-radius:8px;background:#E5B861;box-shadow:0 0 12px rgba(229,184,97,.2)}

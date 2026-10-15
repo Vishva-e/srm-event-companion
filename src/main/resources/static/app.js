@@ -187,7 +187,7 @@ function showLogin({ focus = true, preserveRoute = false, resetForm = true } = {
   loginScreen.hidden = false;
   if (resetForm) loginForm.reset();
   loginError.textContent = '';
-  document.title = 'SRM Event Companion · Event Access';
+  document.title = 'SRM University Graduation Day · Event Companion';
   if (!preserveRoute) history.replaceState(null, '', `${location.pathname}${location.search}`);
   window.scrollTo({ top: 0, behavior: 'instant' });
   if (focus) $('#student-id').focus({ preventScroll: true });
@@ -409,11 +409,6 @@ $$('[data-filter]').forEach(button => button.addEventListener('click', () => {
   filterMenu();
 }));
 $('#menu-search').addEventListener('input', filterMenu);
-
-const preview = $('#hero-preview-seats');
-for (let i = 0; i < 27; i++) {
-  preview.appendChild(make('span', `mini-seat${i === 22 ? ' mini-seat-highlighted' : ''}`));
-}
 
 function pdfText(value) {
   return String(value).normalize('NFKD').replace(/[\u0300-\u036f]/g, '')
