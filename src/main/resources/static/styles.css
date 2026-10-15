@@ -94,6 +94,8 @@ svg{display:block}
 .login-note>span{font-size:16px;line-height:1}
 .login-credit{margin-top:13px;text-align:center;color:#6E8099;font-size:10px;font-weight:700;letter-spacing:.015em}
 .login-credit span{color:var(--primary);font-size:9px;font-weight:800;letter-spacing:.11em;margin-right:5px}
+.version-badge{display:inline-flex;align-items:center;padding:4px 8px;border:1px solid #D9E6F7;border-radius:999px;background:#F4F8FE;color:#315888;font-size:9px;font-weight:800;letter-spacing:.04em;line-height:1}
+.login-credit .version-badge{color:#315888;font-size:9px;letter-spacing:.04em;margin:0}
 
 /* APP LAYOUT */
 .app-shell{display:flex;min-height:100vh;min-height:100dvh}
@@ -153,6 +155,7 @@ svg{display:block}
 .site-footer{padding:19px clamp(24px,4vw,62px) 23px;border-top:1px solid var(--line);font-size:10px;color:#71839C;display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap}
 .site-footer-logo{display:block;width:150px;height:auto;object-fit:contain;background:#fff;padding:4px 6px;border:1px solid #E6ECF4;border-radius:7px}
 .site-footer-credit{font-weight:700;color:#526985}
+.site-footer-version{justify-self:start}
 
 /* THEATRE VIEW */
 .seat-layout{display:grid;grid-template-columns:minmax(0,1.47fr) minmax(290px,.79fr);gap:24px;align-items:start}
